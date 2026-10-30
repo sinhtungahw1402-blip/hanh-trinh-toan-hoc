@@ -1,57 +1,3914 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Hành trình Toán học – Game Toán THCS Lớp 6–9</title>
   
-  <!-- PWA Meta Tags -->
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Toán THCS">
 
-  <!-- KaTeX CSS & JS for beautiful math formula rendering -->
+  <!-- KaTeX CSS & JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 
-  <!-- App Stylesheet -->
-  <link rel="stylesheet" href="css/app.css">
+  <style>
+/* ==========================================================================
+   HÀNH TRÌNH TOÁN HỌC - DESIGN SYSTEM & RESPONSIVE STYLES
+   ========================================================================== */
+
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #e0e7ff;
+  --secondary: #06b6d4;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f97316;
+
+  --bg-dark: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #273549;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Base & Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* App Container */
+#app-root {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: 74px; /* Space for bottom nav on mobile */
+}
+
+@media (min-width: 900px) {
+  #app-root {
+    padding-bottom: 24px;
+  }
+}
+
+/* Header & Status Bar */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.brand-logo {
+  font-size: 26px;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.brand-info h1 {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  background: linear-gradient(to right, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-info p {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* User status chips in header */
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-card);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stat-chip.energy { color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
+.stat-chip.streak { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+.stat-chip.xp { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+
+/* Role Switcher Pill */
+.role-pill {
+  cursor: pointer;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #c7d2fe;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.role-pill:hover {
+  background: rgba(99, 102, 241, 0.35);
+  border-color: #818cf8;
+}
+
+/* Bottom Navigation (Mobile First) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 99;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 3px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+}
+
+.nav-item .nav-icon {
+  font-size: 20px;
+}
+
+.nav-item.active {
+  color: #38bdf8;
+  transform: translateY(-2px);
+}
+
+.nav-item.active .nav-icon {
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+/* Content Views */
+.view-container {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Kingdom & Grade Switcher Tabs */
+.kingdom-selector {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.kingdom-selector::-webkit-scrollbar {
+  display: none;
+}
+
+.kingdom-tab {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kingdom-tab.active {
+  color: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+}
+
+.kingdom-tab[data-grade="6"].active { background: linear-gradient(135deg, #059669, #10b981); border-color: #34d399; }
+.kingdom-tab[data-grade="7"].active { background: linear-gradient(135deg, #0891b2, #06b6d4); border-color: #38bdf8; }
+.kingdom-tab[data-grade="8"].active { background: linear-gradient(135deg, #7c3aed, #8b5cf6); border-color: #a78bfa; }
+.kingdom-tab[data-grade="9"].active { background: linear-gradient(135deg, #d97706, #f59e0b); border-color: #fbbf24; }
+
+/* Chapter & Journey Path */
+.journey-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chapter-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.chapter-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.chapter-title-group h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.chapter-title-group span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chapter-boss-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Winding Path of Lessons */
+.lesson-path {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+
+.path-node-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.path-node-wrapper:active {
+  transform: scale(0.95);
+}
+
+/* Stagger positions for winding adventure trail effect */
+.path-node-wrapper:nth-child(even) { transform: translateX(45px); }
+.path-node-wrapper:nth-child(odd) { transform: translateX(-45px); }
+.path-node-wrapper:nth-child(4n) { transform: translateX(65px); }
+.path-node-wrapper:nth-child(4n-2) { transform: translateX(-65px); }
+.path-node-wrapper.boss-node { transform: translateX(0) !important; }
+
+.lesson-bubble {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: 4px solid #60a5fa;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  position: relative;
+}
+
+.lesson-bubble.locked {
+  background: #334155;
+  border-color: #475569;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.lesson-bubble.boss {
+  width: 82px;
+  height: 82px;
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  border: 4px solid #f87171;
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.6);
+  font-size: 32px;
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.2); }
+}
+
+.node-stars {
+  position: absolute;
+  bottom: -8px;
+  display: flex;
+  gap: 2px;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  border: 1px solid #475569;
+  font-size: 10px;
+}
+
+.node-title-label {
+  margin-top: 8px;
+  max-width: 140px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+  line-height: 1.3;
+}
+
+/* Modals & Dialogs */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-card {
+  transform: translateY(0);
+}
+
+.modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Level Selection Cards inside Lesson Modal */
+.level-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.level-select-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.level-select-card:hover:not(.locked) {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: #6366f1;
+  transform: translateY(-2px);
+}
+
+.level-select-card.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.level-badge {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #38bdf8;
+}
+
+.level-stars-row {
+  display: flex;
+  gap: 3px;
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   GAMEPLAY SCREEN (ARENA)
+   ========================================================================== */
+.game-arena {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.game-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timer-bar-wrap {
+  flex: 1;
+  height: 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.timer-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right, #10b981, #38bdf8);
+  border-radius: var(--radius-full);
+  transition: width 0.1s linear, background-color 0.3s;
+}
+
+.timer-bar-fill.warning {
+  background: #f59e0b;
+}
+
+.timer-bar-fill.danger {
+  background: #ef4444;
+}
+
+.game-combo-pill {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: white;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: bounce 0.6s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-3px); }
+}
+
+.question-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-type-tag {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.question-stem {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #f8fafc;
+}
+
+/* Options Grid for MCQ */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .options-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.option-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.option-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #6366f1;
+}
+
+.option-btn.selected {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.option-btn.correct {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.25) !important;
+  color: #a7f3d0 !important;
+}
+
+.option-btn.wrong {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #fecaca !important;
+}
+
+.option-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* Error Detective (ERR Question) */
+.err-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.err-step-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.err-step-card:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #f87171;
+}
+
+.err-step-card.selected-wrong {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+}
+
+/* Ordering Question (ORDER) */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.order-btns-group {
+  display: flex;
+  gap: 4px;
+}
+
+.order-nav-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* Boss Battle Widget */
+.boss-arena-header {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.boss-avatar-box {
+  font-size: 48px;
+  width: 72px;
+  height: 72px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(220, 38, 38, 0.5);
+  animation: boss-pulse 1.8s infinite;
+}
+
+@keyframes boss-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.boss-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.boss-hp-bar {
+  height: 14px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.boss-hp-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right, #ef4444, #f97316);
+  border-radius: var(--radius-full);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Math Keypad */
+.math-keypad {
+  background: #0b1120;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.keypad-row {
+  display: flex;
+  gap: 6px;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.kp-btn {
+  height: 48px;
+  border: none;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, transform 0.05s;
+}
+
+.kp-btn:active {
+  transform: scale(0.96);
+  background: #334155;
+}
+
+.kp-fn {
+  flex: 1;
+  background: #312e81;
+  color: #c7d2fe;
+}
+
+.kp-op {
+  background: #1e1b4b;
+  color: #a5b4fc;
+}
+
+.kp-del {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+.kp-clear {
+  background: #374151;
+  color: #cbd5e1;
+}
+
+.kp-submit {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 14px;
+}
+
+.kp-zero {
+  grid-column: span 2;
+}
+
+/* ==========================================================================
+   ADMIN PORTAL & MONITORING
+   ========================================================================== */
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpi-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Admin Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  overflow-x: auto;
+}
+
+.admin-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-tab-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+/* Data Tables */
+.table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.data-table th {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+}
+
+.data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tag-badge.active { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+.tag-badge.flagged { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-secondary {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+}
+
+/* Forms */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.form-control {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: #6366f1;
+}
+
+/* Leaderboard */
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lb-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lb-row.top-1 { border-color: #fbbf24; background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), var(--bg-card)); }
+.lb-row.top-2 { border-color: #94a3b8; background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), var(--bg-card)); }
+.lb-row.top-3 { border-color: #d97706; background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), var(--bg-card)); }
+
+.lb-rank {
+  font-size: 16px;
+  font-weight: 800;
+  width: 28px;
+  text-align: center;
+}
+
+.lb-student {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.lb-avatar {
+  font-size: 24px;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lb-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.lb-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.lb-score {
+  font-weight: 800;
+  color: #38bdf8;
+  font-size: 15px;
+}
+
+/* Utilities */
+.text-center { text-align: center; }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.d-none { display: none !important; }
+
+  </style>
 </head>
 <body>
   <div id="app-root">
-    <!-- Thanh tiêu đề ứng dụng (Header) -->
+    <!-- Header -->
     <header id="app-header" class="app-header"></header>
 
-    <!-- Khu vực nội dung chính hiển thị các màn hình (Main Views) -->
+    <!-- Main Views -->
     <main id="main-content" style="flex: 1;"></main>
 
-    <!-- Thanh điều hướng dưới cùng cho điện thoại (Bottom Nav) -->
+    <!-- Bottom Nav -->
     <nav id="bottom-nav" class="bottom-nav"></nav>
 
-    <!-- Modal chung hiển thị chi tiết bài học, Boss, giải thích, thêm câu hỏi -->
+    <!-- Universal Modal -->
     <div id="app-modal" class="modal-overlay">
       <div id="modal-content-area" class="modal-card"></div>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="js/data.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/mathKeypad.js"></script>
-  <script src="js/app.js"></script>
-
-  <!-- Service Worker Registration for PWA -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
-          console.log('ServiceWorker registration skipped or unsupported in this mode:', err);
-        });
-      });
+// Dữ liệu chương trình Toán THCS Kết nối tri thức (Lớp 6, 7, 8, 9)
+// Bao gồm: Khối lớp, Chương, Bài, Câu hỏi mẫu (MCQ, NUM, ORDER, ERR, Boss), Học sinh mẫu, Nhật ký hoạt động
+
+const KINGDOMS = [
+  {
+    id: 6,
+    name: "Lớp 6: Vương quốc Rừng Xanh",
+    subtitle: "Khu rừng Số học & Hình học kỳ bí",
+    theme: "forest",
+    icon: "🌲",
+    color: "#10b981",
+    bgGradient: "linear-gradient(135deg, #064e3b 0%, #065f46 100%)",
+    chaptersCount: 9,
+    lessonsCount: 45,
+    chapters: [
+      {
+        id: "L6-C1",
+        number: 1,
+        title: "Tập hợp các số tự nhiên",
+        bossName: "Mộc Tinh Khổng Lồ",
+        bossHp: 100,
+        bossAvatar: "🌲👹",
+        lessons: [
+          { id: "L6-C1-B1", num: 1, title: "Tập hợp", focus: "Nhận biết phần tử, viết tập hợp", type: "Tính nhanh" },
+          { id: "L6-C1-B2", num: 2, title: "Cách ghi số tự nhiên", focus: "Hệ thập phân, số La Mã", type: "Tính nhanh" },
+          { id: "L6-C1-B3", num: 3, title: "Thứ tự trong tập hợp số tự nhiên", focus: "So sánh, sắp xếp", type: "Sắp xếp lời giải" },
+          { id: "L6-C1-B4", num: 4, title: "Phép cộng và phép trừ số tự nhiên", focus: "Tính nhanh, giao hoán, kết hợp", type: "Tính nhanh" },
+          { id: "L6-C1-B5", num: 5, title: "Phép nhân và phép chia số tự nhiên", focus: "Tính nhanh, chia có dư", type: "Khu chợ thực tế" },
+          { id: "L6-C1-B6", num: 6, title: "Lũy thừa với số mũ tự nhiên", focus: "Tính lũy thừa, nhân chia cùng cơ số", type: "Tính nhanh" },
+          { id: "L6-C1-B7", num: 7, title: "Thứ tự thực hiện các phép tính", focus: "Tính giá trị biểu thức, tìm x", type: "Thám tử lỗi sai" }
+        ]
+      },
+      {
+        id: "L6-C2",
+        number: 2,
+        title: "Tính chia hết trong tập hợp số tự nhiên",
+        bossName: "Yêu Tinh Chia Hết",
+        bossHp: 120,
+        bossAvatar: "🧌⚔️",
+        lessons: [
+          { id: "L6-C2-B8", num: 8, title: "Quan hệ chia hết và tính chất", focus: "Ước, bội, xét tổng chia hết", type: "Tính nhanh" },
+          { id: "L6-C2-B9", num: 9, title: "Dấu hiệu chia hết", focus: "Dấu hiệu chia hết cho 2, 3, 5, 9", type: "Săn quái" },
+          { id: "L6-C2-B10", num: 10, title: "Số nguyên tố", focus: "Nhận biết số nguyên tố, phân tích thừa số", type: "Tính nhanh" },
+          { id: "L6-C2-B11", num: 11, title: "Ước chung. Ước chung lớn nhất", focus: "Tìm ƯCLN, bài toán chia quà đều", type: "Khu chợ thực tế" },
+          { id: "L6-C2-B12", num: 12, title: "Bội chung. Bội chung nhỏ nhất", focus: "Tìm BCNN, bài toán lịch trùng", type: "Khu chợ thực tế" }
+        ]
+      },
+      {
+        id: "L6-C3",
+        number: 3,
+        title: "Số nguyên",
+        bossName: "Băng Tinh Âm Độ",
+        bossHp: 130,
+        bossAvatar: "❄️👹",
+        lessons: [
+          { id: "L6-C3-B13", num: 13, title: "Tập hợp các số nguyên", focus: "Trục số, so sánh, số đối", type: "Tính nhanh" },
+          { id: "L6-C3-B14", num: 14, title: "Phép cộng và phép trừ số nguyên", focus: "Nhiệt độ, độ cao, quy tắc dấu", type: "Tính nhanh" },
+          { id: "L6-C3-B15", num: 15, title: "Quy tắc dấu ngoặc", focus: "Bỏ ngoặc, đổi dấu", type: "Thám tử lỗi sai" },
+          { id: "L6-C3-B16", num: 16, title: "Phép nhân số nguyên", focus: "Quy tắc dấu âm x âm ra dương", type: "Tính nhanh" },
+          { id: "L6-C3-B17", num: 17, title: "Phép chia hết. Ước và bội của số nguyên", focus: "Ước bội trong Z", type: "Săn quái" }
+        ]
+      },
+      {
+        id: "L6-C4",
+        number: 4,
+        title: "Một số hình phẳng trong thực tiễn",
+        bossName: "Vua Hình Phẳng",
+        bossHp: 110,
+        bossAvatar: "🔷👑",
+        lessons: [
+          { id: "L6-C4-B18", num: 18, title: "Hình tam giác đều. Hình vuông. Lục giác đều", focus: "Nhận dạng, số cạnh, đường chéo", type: "Xưởng hình học" },
+          { id: "L6-C4-B19", num: 19, title: "Hình chữ nhật. Hình thoi", focus: "Tính chất cạnh, góc, đường chéo", type: "Xưởng hình học" },
+          { id: "L6-C4-B20", num: 20, title: "Hình bình hành. Hình thang cân", focus: "Nhận dạng, tính chất", type: "Xưởng hình học" },
+          { id: "L6-C4-B21", num: 21, title: "Chu vi và diện tích của một số tứ giác", focus: "Tính diện tích lát sàn thực tế", type: "Khu chợ thực tế" }
+        ]
+      },
+      {
+        id: "L6-C6",
+        number: 6,
+        title: "Phân số",
+        bossName: "Phù Thủy Tối Giản",
+        bossHp: 140,
+        bossAvatar: "🧙‍♂️➗",
+        lessons: [
+          { id: "L6-C6-B24", num: 24, title: "Khái niệm phân số & rút gọn", focus: "Rút gọn phân số tối giản", type: "Tính nhanh" },
+          { id: "L6-C6-B25", num: 25, title: "So sánh phân số", focus: "Quy đồng mẫu, so sánh", type: "Tính nhanh" },
+          { id: "L6-C6-B26", num: 26, title: "Phép cộng và phép trừ phân số", focus: "Quy đồng mẫu số trước khi cộng", type: "Thám tử lỗi sai" },
+          { id: "L6-C6-B27", num: 27, title: "Phép nhân và phép chia phân số", focus: "Nhân chia phân số, tìm x", type: "Tính nhanh" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 7,
+    name: "Lớp 7: Vương quốc Đại Dương",
+    subtitle: "Biển cả Số hữu tỉ & Tam giác bằng nhau",
+    theme: "ocean",
+    icon: "🌊",
+    color: "#06b6d4",
+    bgGradient: "linear-gradient(135deg, #0e7490 0%, #155e75 100%)",
+    chaptersCount: 10,
+    lessonsCount: 37,
+    chapters: [
+      {
+        id: "L7-C1",
+        number: 1,
+        title: "Số hữu tỉ",
+        bossName: "Hải Vương Kraken",
+        bossHp: 150,
+        bossAvatar: "🐙🔱",
+        lessons: [
+          { id: "L7-C1-B1", num: 1, title: "Tập hợp các số hữu tỉ", focus: "Trục số, đối số, so sánh", type: "Tính nhanh" },
+          { id: "L7-C1-B2", num: 2, title: "Cộng, trừ, nhân, chia số hữu tỉ", focus: "Tính nhanh, thứ tự phép tính", type: "Sắp xếp lời giải" },
+          { id: "L7-C1-B3", num: 3, title: "Lũy thừa của một số hữu tỉ", focus: "Nhân chia hai lũy thừa cùng cơ số", type: "Tính nhanh" },
+          { id: "L7-C1-B4", num: 4, title: "Quy tắc dấu ngoặc và chuyển vế", focus: "Chuyển vế đổi dấu, tìm x", type: "Thám tử lỗi sai" }
+        ]
+      },
+      {
+        id: "L7-C2",
+        number: 2,
+        title: "Số thực và căn bậc hai",
+        bossName: "Bóng Ma Vô Tỉ",
+        bossHp: 160,
+        bossAvatar: "👻♾️",
+        lessons: [
+          { id: "L7-C2-B5", num: 5, title: "Số thập phân vô hạn tuần hoàn", focus: "Đổi phân số sang thập phân, chu kỳ", type: "Tính nhanh" },
+          { id: "L7-C2-B6", num: 6, title: "Số vô tỉ. Căn bậc hai số học", focus: "Tính căn bậc hai, nhận biết số vô tỉ", type: "Tính nhanh" },
+          { id: "L7-C2-B7", num: 7, title: "Tập hợp số thực", focus: "Trục số thực, giá trị tuyệt đối", type: "Tính nhanh" }
+        ]
+      },
+      {
+        id: "L7-C4",
+        number: 4,
+        title: "Tam giác bằng nhau",
+        bossName: "Tam Giác Quỷ Bermuda",
+        bossHp: 170,
+        bossAvatar: "🔺🌪️",
+        lessons: [
+          { id: "L7-C4-B12", num: 12, title: "Tổng các góc trong tam giác", focus: "Định lý tổng 3 góc bằng 180°", type: "Xưởng hình học" },
+          { id: "L7-C4-B13", num: 13, title: "Trường hợp bằng nhau thứ nhất (c-c-c)", focus: "Ba cạnh tương ứng bằng nhau", type: "Xưởng hình học" },
+          { id: "L7-C4-B14", num: 14, title: "Trường hợp c-g-c và g-c-g", focus: "Góc xen giữa hai cạnh", type: "Sắp xếp lời giải" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 8,
+    name: "Lớp 8: Vương quốc Công Nghệ",
+    subtitle: "Thành phố Đa thức & Hằng đẳng thức",
+    theme: "cyber",
+    icon: "🏙️",
+    color: "#8b5cf6",
+    bgGradient: "linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%)",
+    chaptersCount: 10,
+    lessonsCount: 39,
+    chapters: [
+      {
+        id: "L8-C1",
+        number: 1,
+        title: "Đa thức nhiều biến",
+        bossName: "Người Máy Cyber-G",
+        bossHp: 180,
+        bossAvatar: "🤖⚡",
+        lessons: [
+          { id: "L8-C1-B1", num: 1, title: "Đơn thức nhiều biến", focus: "Bậc của đơn thức, thu gọn đơn thức", type: "Tính nhanh" },
+          { id: "L8-C1-B2", num: 2, title: "Đa thức", focus: "Thu gọn đa thức, bậc đa thức", type: "Tính nhanh" },
+          { id: "L8-C1-B3", num: 3, title: "Phép cộng và phép trừ đa thức", focus: "Cộng trừ đa thức nhiều biến", type: "Thám tử lỗi sai" },
+          { id: "L8-C1-B4", num: 4, title: "Phép nhân đa thức", focus: "Nhân đơn với đa, đa với đa", type: "Tính nhanh" }
+        ]
+      },
+      {
+        id: "L8-C2",
+        number: 2,
+        title: "Hằng đẳng thức đáng nhớ",
+        bossName: "Lãnh Chúa Phân Tích",
+        bossHp: 200,
+        bossAvatar: "🦹‍♂️📐",
+        lessons: [
+          { id: "L8-C2-B6", num: 6, title: "Bình phương tổng/hiệu, hiệu hai bình phương", focus: "Khai triển $(a+b)^2, (a-b)^2, a^2-b^2$", type: "Thám tử lỗi sai" },
+          { id: "L8-C2-B7", num: 7, title: "Lập phương của một tổng hoặc hiệu", focus: "$(a+b)^3, (a-b)^3$", type: "Tính nhanh" },
+          { id: "L8-C2-B8", num: 8, title: "Tổng và hiệu hai lập phương", focus: "$a^3+b^3, a^3-b^3$", type: "Tính nhanh" },
+          { id: "L8-C2-B9", num: 9, title: "Phân tích đa thức thành nhân tử", focus: "Đặt nhân tử chung, nhóm, dùng hằng đẳng thức", type: "Sắp xếp lời giải" }
+        ]
+      },
+      {
+        id: "L8-C4",
+        number: 4,
+        title: "Định lí Thalès và Tam giác đồng dạng",
+        bossName: "Tỉ Lệ Thần Vương",
+        bossHp: 190,
+        bossAvatar: "📐👑",
+        lessons: [
+          { id: "L8-C4-B15", num: 15, title: "Định lí Thalès trong tam giác", focus: "Đoạn thẳng tỉ lệ, tính độ dài", type: "Xưởng hình học" },
+          { id: "L8-C4-B16", num: 16, title: "Đường trung bình của tam giác", focus: "Song song và bằng nửa cạnh đáy", type: "Tính nhanh" },
+          { id: "L8-C4-B35", num: 35, title: "Định lí Pythagore", focus: "$a^2+b^2=c^2$, ứng dụng thực tế", type: "Khu chợ thực tế" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 9,
+    name: "Lớp 9: Vương quốc Vũ Trụ",
+    subtitle: "Chinh phục Phương trình bậc hai & Đường tròn",
+    theme: "space",
+    icon: "🚀",
+    color: "#f59e0b",
+    bgGradient: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+    chaptersCount: 10,
+    lessonsCount: 32,
+    chapters: [
+      {
+        id: "L9-C1",
+        number: 1,
+        title: "Hệ phương trình bậc nhất hai ẩn",
+        bossName: "Chiến Hạm Hai Ẩn",
+        bossHp: 220,
+        bossAvatar: "🛸🌌",
+        lessons: [
+          { id: "L9-C1-B1", num: 1, title: "Khái niệm phương trình bậc nhất hai ẩn", focus: "Nhận biết nghiệm, kiểm tra cặp (x, y)", type: "Tính nhanh" },
+          { id: "L9-C1-B2", num: 2, title: "Giải hệ bằng phương pháp thế & cộng", focus: "Khử ẩn, giải hệ hai phương trình", type: "Sắp xếp lời giải" },
+          { id: "L9-C1-B3", num: 3, title: "Giải bài toán thực tế bằng hệ phương trình", focus: "Toán chuyển động, năng suất", type: "Khu chợ thực tế" }
+        ]
+      },
+      {
+        id: "L9-C3",
+        number: 3,
+        title: "Căn thức bậc hai và bậc ba",
+        bossName: "Chúa Tể Căn Thức",
+        bossHp: 210,
+        bossAvatar: "🪐⚔️",
+        lessons: [
+          { id: "L9-C3-B7", num: 7, title: "Căn bậc hai và căn thức bậc hai", focus: "Điều kiện xác định $A \\ge 0$", type: "Tính nhanh" },
+          { id: "L9-C3-B8", num: 8, title: "Khai căn tích và thương", focus: "Biến đổi căn thức", type: "Tính nhanh" },
+          { id: "L9-C3-B9", num: 9, title: "Rút gọn biểu thức chứa căn", focus: "Trục căn thức ở mẫu, đưa thừa số ra ngoài", type: "Thám tử lỗi sai" }
+        ]
+      },
+      {
+        id: "L9-C6",
+        number: 6,
+        title: "Hàm số y = ax² và Phương trình bậc hai",
+        bossName: "Hố Đen Parabol",
+        bossHp: 250,
+        bossAvatar: "🕳️⭐",
+        lessons: [
+          { id: "L9-C6-B18", num: 18, title: "Hàm số y = ax² (a ≠ 0)", focus: "Tính chất biến thiên, đồ thị Parabol", type: "Xưởng hình học" },
+          { id: "L9-C6-B19", num: 19, title: "Công thức nghiệm phương trình bậc hai", focus: "Biệt thức $\\Delta = b^2 - 4ac$", type: "Tính nhanh" },
+          { id: "L9-C6-B20", num: 20, title: "Định lí Viète và ứng dụng", focus: "$x_1+x_2 = -b/a, x_1 x_2 = c/a$", type: "Thám tử lỗi sai" }
+        ]
+      }
+    ]
+  }
+];
+
+// Ngân hàng câu hỏi chi tiết theo chuẩn format tài liệu:
+// Hỗ trợ MCQ (kèm error_code), NUM (bàn phím toán), ORDER (sắp xếp), ERR (thám tử lỗi sai)
+const QUESTION_BANK = [
+  // LỚP 6
+  {
+    id: "q_l6_001",
+    lesson_id: "L6-C1-B1",
+    grade: 6,
+    level: 1,
+    type: "MCQ",
+    stem: "Cho tập hợp $A = \\{2; 3; 5; 7\\}$. Khẳng định nào sau đây là **đúng**?",
+    options: [
+      { text: "$5 \\in A$", correct: true },
+      { text: "$4 \\in A$", error_code: "not_in_set", explain: "Số 4 không nằm trong danh sách các phần tử của tập A." },
+      { text: "$7 \\notin A$", error_code: "wrong_symbol", explain: "Kí hiệu $\\notin$ nghĩa là không thuộc, trong khi 7 có trong A." },
+      { text: "$2 \\subset A$", error_code: "element_vs_subset", explain: "Số 2 là phần tử nên phải dùng kí hiệu thuộc $\\in$, không dùng $\\subset$." }
+    ],
+    solution_steps: ["Tập hợp A gồm 4 phần tử: 2, 3, 5, 7.", "Số 5 là một phần tử của A nên $5 \\in A$."],
+    hints: ["Kiểm tra xem từng số có mặt trong dấu ngoặc nhọn của A hay không."],
+    time_limit_sec: 30
+  },
+  {
+    id: "q_l6_002",
+    lesson_id: "L6-C1-B6",
+    grade: 6,
+    level: 1,
+    type: "NUM",
+    stem: "Tính giá trị của lũy thừa $2^4$:",
+    correct_num: "16",
+    solution_steps: ["$2^4 = 2 \\times 2 \\times 2 \\times 2 = 16$"],
+    hints: ["$2^4$ là tích của 4 thừa số 2 nhân với nhau."],
+    time_limit_sec: 30
+  },
+  {
+    id: "q_l6_003",
+    lesson_id: "L6-C3-B16",
+    grade: 6,
+    level: 2,
+    type: "MCQ",
+    stem: "Tính kết quả của phép nhân: $(-4) \\times (-5)$",
+    options: [
+      { text: "$20$", correct: true },
+      { text: "$-20$", error_code: "wrong_sign_mult", explain: "Lỗi sai dấu: Tích của hai số nguyên cùng dấu âm luôn là một số nguyên dương." },
+      { text: "$-9$", error_code: "add_instead_mult", explain: "Bạn đang cộng $(-4)+(-5)$ thay vì nhân." },
+      { text: "$9$", error_code: "wrong_op", explain: "Đây là phép nhân, không phải phép tính trừ." }
+    ],
+    solution_steps: ["Quy tắc nhân hai số nguyên âm: $(-a) \\times (-b) = a \\times b$", "$(-4) \\times (-5) = 4 \\times 5 = 20$."],
+    hints: ["Nhớ quy tắc: Âm nhân âm thành dương."],
+    time_limit_sec: 25
+  },
+  {
+    id: "q_l6_004",
+    lesson_id: "L6-C6-B26",
+    grade: 6,
+    level: 2,
+    type: "MCQ",
+    stem: "Tính kết quả phép cộng: $\\frac{1}{2} + \\frac{1}{3}$",
+    options: [
+      { text: "$\\frac{5}{6}$", correct: true },
+      { text: "$\\frac{2}{5}$", error_code: "no_common_denom", explain: "Sai lầm phổ biến: Bạn đã lấy tử cộng tử (1+1=2) và mẫu cộng mẫu (2+3=5). Phải quy đồng mẫu số chung trước khi cộng!" },
+      { text: "$\\frac{1}{5}$", error_code: "wrong_sum", explain: "Không được cộng hai mẫu số với nhau." },
+      { text: "$\\frac{5}{5} = 1$", error_code: "wrong_denom", explain: "Mẫu chung của 2 và 3 là BCNN(2, 3) = 6." }
+    ],
+    solution_steps: [
+      "Mẫu số chung của 2 và 3 là 6.",
+      "Quy đồng: $\\frac{1}{2} = \\frac{3}{6}$ và $\\frac{1}{3} = \\frac{2}{6}$",
+      "Cộng hai phân số cùng mẫu: $\\frac{3}{6} + \\frac{2}{6} = \\frac{5}{6}$."
+    ],
+    hints: ["Tìm mẫu số chung nhỏ nhất của 2 và 3 là 6.", "Quy đồng cả hai phân số về mẫu 6 rồi cộng tử."],
+    time_limit_sec: 40
+  },
+  {
+    id: "q_l6_005",
+    lesson_id: "L6-C1-B7",
+    grade: 6,
+    level: 3,
+    type: "ERR",
+    stem: "Bạn Nam thực hiện tính biểu thức $A = 20 - 4 \\times 3 + 2$. Hãy tìm xem bạn Nam bị sai ở bước nào?",
+    steps: [
+      { num: 1, text: "Bước 1: Giữ nguyên số 20, tính phép nhân $4 \\times 3 = 12$" },
+      { num: 2, text: "Bước 2: Viết lại thành $A = 20 - 14$ (lấy $12 + 2 = 14$)" },
+      { num: 3, text: "Bước 3: Tính $A = 6$" }
+    ],
+    wrong_step_num: 2,
+    explain: "Ở Bước 2 bạn Nam thực hiện phép cộng trước phép trừ từ trái sang phải là sai. Phải tính: $20 - 12 + 2 = 8 + 2 = 10$.",
+    solution_steps: [
+      "Thứ tự đúng: Nhân chia trước, cộng trừ sau. Các phép cộng trừ làm lần lượt từ trái sang phải.",
+      "$20 - 4 \\times 3 + 2 = 20 - 12 + 2 = 8 + 2 = 10$."
+    ],
+    hints: ["Khi chỉ còn phép cộng và phép trừ, ta phải thực hiện lần lượt từ trái sang phải."],
+    time_limit_sec: 45
+  },
+
+  // LỚP 7
+  {
+    id: "q_l7_001",
+    lesson_id: "L7-C1-B2",
+    grade: 7,
+    level: 1,
+    type: "NUM",
+    stem: "Tính giá trị của biểu thức: $\\left(-\\frac{3}{5}\\right) + \\frac{8}{5}$ (nhập kết quả dưới dạng số nguyên):",
+    correct_num: "1",
+    solution_steps: ["Hai phân số cùng mẫu 5: $\\frac{-3 + 8}{5} = \\frac{5}{5} = 1$."],
+    hints: ["Cùng mẫu số 5, ta giữ nguyên mẫu và lấy $(-3) + 8$."],
+    time_limit_sec: 30
+  },
+  {
+    id: "q_l7_002",
+    lesson_id: "L7-C1-B4",
+    grade: 7,
+    level: 2,
+    type: "ORDER",
+    stem: "Sắp xếp 4 bước sau để tìm x trong phương trình: $x + \\frac{1}{3} = \\frac{5}{6}$",
+    items: [
+      { id: "s1", text: "Áp dụng quy tắc chuyển vế: $x = \\frac{5}{6} - \\frac{1}{3}$" },
+      { id: "s2", text: "Quy đồng mẫu số: $x = \\frac{5}{6} - \\frac{2}{6}$" },
+      { id: "s3", text: "Thực hiện phép trừ tử số: $x = \\frac{3}{6}$" },
+      { id: "s4", text: "Rút gọn phân số tối giản: $x = \\frac{1}{2}$" }
+    ],
+    correct_order: ["s1", "s2", "s3", "s4"],
+    solution_steps: [
+      "Bước 1: Chuyển $\\frac{1}{3}$ sang vế phải đổi dấu thành $-\\frac{1}{3}$.",
+      "Bước 2: Quy đồng mẫu số chung là 6.",
+      "Bước 3: Trừ hai phân số cùng mẫu.",
+      "Bước 4: Rút gọn kết quả tối giản."
+    ],
+    hints: ["Bắt đầu bằng việc chuyển hạng tử tự do sang vế phải."],
+    time_limit_sec: 45
+  },
+  {
+    id: "q_l7_003",
+    lesson_id: "L7-C2-B6",
+    grade: 7,
+    level: 2,
+    type: "MCQ",
+    stem: "Căn bậc hai số học của $49$ là số nào?",
+    options: [
+      { text: "$7$", correct: true },
+      { text: "$\\pm 7$", error_code: "arithmetic_sqrt_is_positive", explain: "Căn bậc hai số học của một số không âm luôn là số KHÔNG ÂM (chỉ lấy giá trị dương)." },
+      { text: "$-7$", error_code: "sqrt_negative", explain: "Căn bậc hai số học không thể là số âm." },
+      { text: "$2401$", error_code: "squared_instead", explain: "Bạn đang tính bình phương $49^2$ thay vì lấy căn." }
+    ],
+    solution_steps: ["Theo định nghĩa: Căn bậc hai số học của $a \\ge 0$ là số $x \\ge 0$ sao cho $x^2 = a$.", "Vì $7 \\ge 0$ và $7^2 = 49$ nên $\\sqrt{49} = 7$."],
+    hints: ["Căn bậc hai số học luôn là một số không âm."],
+    time_limit_sec: 30
+  },
+
+  // LỚP 8
+  {
+    id: "q_l8_001",
+    lesson_id: "L8-C2-B6",
+    grade: 8,
+    level: 2,
+    type: "MCQ",
+    stem: "Khai triển hằng đẳng thức $(x + 3)^2$ ta được biểu thức nào?",
+    options: [
+      { text: "$x^2 + 6x + 9$", correct: true },
+      { text: "$x^2 + 9$", error_code: "miss_cross_term", explain: "Thiếu số hạng hai lần tích $2ab = 2 \\times x \\times 3 = 6x$. Nhớ rằng $(a+b)^2 = a^2 + 2ab + b^2$!" },
+      { text: "$x^2 + 3x + 9$", error_code: "wrong_cross_term", explain: "Sai hệ số hạng tử chéo: $2ab = 2 \\times x \\times 3 = 6x$ chứ không phải $3x$." },
+      { text: "$x^2 + 6x + 3$", error_code: "no_square_const", explain: "Số hạng cuối cùng phải là $b^2 = 3^2 = 9$, không phải 3." }
+    ],
+    solution_steps: [
+      "Áp dụng hằng đẳng thức bình phương của một tổng: $(a + b)^2 = a^2 + 2ab + b^2$",
+      "Với $a = x, b = 3$:",
+      "Ta có: $(x + 3)^2 = x^2 + 2 \\cdot x \\cdot 3 + 3^2 = x^2 + 6x + 9$."
+    ],
+    hints: ["Áp dụng $(a+b)^2 = a^2 + 2ab + b^2$. Đừng quên số hạng $2ab$!"],
+    time_limit_sec: 35
+  },
+  {
+    id: "q_l8_002",
+    lesson_id: "L8-C2-B6",
+    grade: 8,
+    level: 3,
+    type: "ERR",
+    stem: "Thám tử lỗi sai: Tìm bước sai trong bài biến đổi rút gọn biểu thức $(x - 4)^2$ của bạn Hoa:",
+    steps: [
+      { num: 1, text: "Dòng 1: Áp dụng hằng đẳng thức $(a - b)^2 = a^2 - 2ab + b^2$" },
+      { num: 2, text: "Dòng 2: Thay số: $x^2 - 2 \\times x \\times 4 - 4^2$" },
+      { num: 3, text: "Dòng 3: Tính ra: $x^2 - 8x - 16$" }
+    ],
+    wrong_step_num: 2,
+    explain: "Dòng 2 bị sai dấu ở số hạng cuối cùng: theo công thức là $+ b^2$, tức là $+ 4^2 = +16$, không phải $- 4^2$.",
+    solution_steps: [
+      "Công thức đúng: $(a - b)^2 = a^2 - 2ab + b^2$",
+      "Khai triển đúng: $(x - 4)^2 = x^2 - 8x + 16$."
+    ],
+    hints: ["Chú ý dấu của số hạng cuối cùng $b^2$ luôn luôn là dấu cộng!"],
+    time_limit_sec: 45
+  },
+  {
+    id: "q_l8_003",
+    lesson_id: "L8-C4-B35",
+    grade: 8,
+    level: 2,
+    type: "NUM",
+    stem: "Một tam giác vuông có hai cạnh góc vuông lần lượt là $6\\text{ cm}$ và $8\\text{ cm}$. Độ dài cạnh huyền là bao nhiêu cm?",
+    correct_num: "10",
+    solution_steps: [
+      "Theo định lí Pythagore: $c^2 = a^2 + b^2$",
+      "$c^2 = 6^2 + 8^2 = 36 + 64 = 100$",
+      "Suy ra $c = \\sqrt{100} = 10\\text{ cm}$."
+    ],
+    hints: ["Cạnh huyền bình phương bằng tổng bình phương hai cạnh góc vuông."],
+    time_limit_sec: 40
+  },
+
+  // LỚP 9
+  {
+    id: "q_l9_001",
+    lesson_id: "L9-C1-B2",
+    grade: 9,
+    level: 2,
+    type: "MCQ",
+    stem: "Cặp số $(x; y)$ nào là nghiệm của hệ phương trình $\\begin{cases} x + y = 5 \\\\ 2x - y = 4 \\end{cases}$?",
+    options: [
+      { text: "$(3; 2)$", correct: true },
+      { text: "$(2; 3)$", error_code: "swap_xy", explain: "Thử lại: $2(2) - 3 = 1 \\ne 4$. Bạn đã đảo ngược giá trị của x và y." },
+      { text: "$(4; 1)$", error_code: "only_first_eq", explain: "Cặp (4; 1) chỉ thỏa mãn phương trình đầu, nhưng $2(4) - 1 = 7 \\ne 4$." },
+      { text: "$(5; 0)$", error_code: "guess_no_check", explain: "Cặp (5; 0) không thỏa mãn phương trình thứ hai." }
+    ],
+    solution_steps: [
+      "Cộng hai phương trình vế theo vế: $(x + y) + (2x - y) = 5 + 4 \\Rightarrow 3x = 9 \\Rightarrow x = 3$.",
+      "Thay $x = 3$ vào $x + y = 5 \\Rightarrow 3 + y = 5 \\Rightarrow y = 2$.",
+      "Vậy nghiệm của hệ là $(3; 2)$."
+    ],
+    hints: ["Cộng hai phương trình để triệt tiêu ẩn y."],
+    time_limit_sec: 45
+  },
+  {
+    id: "q_l9_002",
+    lesson_id: "L9-C6-B19",
+    grade: 9,
+    level: 2,
+    type: "NUM",
+    stem: "Tính biệt thức $\\Delta = b^2 - 4ac$ của phương trình bậc hai: $x^2 - 6x + 5 = 0$",
+    correct_num: "16",
+    solution_steps: [
+      "Xác định các hệ số: $a = 1, b = -6, c = 5$.",
+      "Biệt thức $\\Delta = (-6)^2 - 4 \\times 1 \\times 5 = 36 - 20 = 16$."
+    ],
+    hints: ["Hệ số $b = -6$, chú ý $(-6)^2 = 36$."],
+    time_limit_sec: 35
+  },
+  {
+    id: "q_l9_003",
+    lesson_id: "L9-C6-B20",
+    grade: 9,
+    level: 3,
+    type: "MCQ",
+    stem: "Cho phương trình $x^2 - 7x + 10 = 0$. Theo định lí Viète, tổng $S = x_1 + x_2$ và tích $P = x_1 x_2$ lần lượt là:",
+    options: [
+      { text: "$S = 7;\\ P = 10$", correct: true },
+      { text: "$S = -7;\\ P = 10$", error_code: "viet_sign_error", explain: "Lỗi sai dấu Viète: Định lí Viète phát biểu tổng hai nghiệm là $S = -\\frac{b}{a}$. Ở đây $b = -7$ nên $S = -(-7) = 7$!" },
+      { text: "$S = 7;\\ P = -10$", error_code: "viet_c_sign", explain: "Tích $P = \\frac{c}{a} = 10$, giữ nguyên dấu của c." },
+      { text: "$S = -7;\\ P = -10$", error_code: "both_wrong_sign", explain: "Cần nhớ công thức chuẩn: $x_1 + x_2 = -b/a$ và $x_1 x_2 = c/a$." }
+    ],
+    solution_steps: [
+      "Phương trình có $a = 1, b = -7, c = 10$.",
+      "Theo định lí Viète: $S = x_1 + x_2 = -\\frac{b}{a} = -\\frac{-7}{1} = 7$.",
+      "Tích: $P = x_1 x_2 = \\frac{c}{a} = \\frac{10}{1} = 10$."
+    ],
+    hints: ["Tổng nghiệm có dấu trừ đằng trước: $S = -b/a$."],
+    time_limit_sec: 35
+  }
+];
+
+// Danh sách học sinh mẫu ban đầu để Quản trị viên (Admin) thấy bảng theo dõi hoạt động sống động
+const INITIAL_STUDENTS = [
+  {
+    id: "hs_001",
+    username: "minhanh_k6",
+    name: "Nguyễn Minh Anh",
+    nickname: "AnhSaoBang",
+    grade: 6,
+    avatar: "🦊",
+    school: "THCS Chu Văn An",
+    classCode: "6A1",
+    xp: 2850,
+    level: 8,
+    stars: 38,
+    streak: 6,
+    energy: 5,
+    status: "active",
+    lastActive: "Vừa xong",
+    accuracy: 92,
+    gamesPlayed: 42
+  },
+  {
+    id: "hs_002",
+    username: "quanghuy_k7",
+    name: "Trần Quang Huy",
+    nickname: "HuyHaiMa",
+    grade: 7,
+    avatar: "🐬",
+    school: "THCS Trưng Vương",
+    classCode: "7B2",
+    xp: 3420,
+    level: 10,
+    stars: 45,
+    streak: 9,
+    energy: 4,
+    status: "active",
+    lastActive: "5 phút trước",
+    accuracy: 88,
+    gamesPlayed: 56
+  },
+  {
+    id: "hs_003",
+    username: "baonam_k8",
+    name: "Lê Bảo Nam",
+    nickname: "NamCyber",
+    grade: 8,
+    avatar: "🤖",
+    school: "THCS Giảng Võ",
+    classCode: "8A4",
+    xp: 4190,
+    level: 12,
+    stars: 52,
+    streak: 14,
+    energy: 5,
+    status: "active",
+    lastActive: "12 phút trước",
+    accuracy: 94,
+    gamesPlayed: 68
+  },
+  {
+    id: "hs_004",
+    username: "khanhlinh_k9",
+    name: "Phạm Khánh Linh",
+    nickname: "LinhCosmos",
+    grade: 9,
+    avatar: "🚀",
+    school: "THCS Cầu Giấy",
+    classCode: "9A3",
+    xp: 5310,
+    level: 15,
+    stars: 64,
+    streak: 21,
+    energy: 5,
+    status: "active",
+    lastActive: "25 phút trước",
+    accuracy: 96,
+    gamesPlayed: 85
+  },
+  {
+    id: "hs_005",
+    username: "ducthang_k6",
+    name: "Vũ Đức Thắng",
+    nickname: "ThangNinja",
+    grade: 6,
+    avatar: "🐯",
+    school: "THCS Thăng Long",
+    classCode: "6A2",
+    xp: 1450,
+    level: 5,
+    stars: 21,
+    streak: 3,
+    energy: 3,
+    status: "active",
+    lastActive: "1 giờ trước",
+    accuracy: 74,
+    gamesPlayed: 28
+  },
+  {
+    id: "hs_006",
+    username: "hoanglong_cheat",
+    name: "Hoàng Phi Long",
+    nickname: "LongSieuToc",
+    grade: 8,
+    avatar: "⚡",
+    school: "THCS Đoàn Thị Điểm",
+    classCode: "8C1",
+    xp: 6800,
+    level: 18,
+    stars: 80,
+    streak: 30,
+    energy: 5,
+    status: "flagged",
+    lastActive: "2 giờ trước",
+    accuracy: 100,
+    gamesPlayed: 80,
+    flagReason: "Hoàn thành 10 câu trong 4 giây (Tốc độ bất thường)"
+  }
+];
+
+// Danh sách nhật ký hoạt động (Live Activity Logs) để Admin theo dõi thời gian thực
+const INITIAL_ACTIVITY_LOGS = [
+  {
+    id: "act_101",
+    studentId: "hs_001",
+    studentName: "Nguyễn Minh Anh",
+    nickname: "AnhSaoBang",
+    grade: 6,
+    lessonTitle: "Bài 26: Phép cộng và trừ phân số",
+    mode: "Thám tử lỗi sai",
+    score: 95,
+    stars: 3,
+    accuracy: 100,
+    timeSpent: "2m 14s",
+    timestamp: "20:42:15",
+    status: "passed"
+  },
+  {
+    id: "act_102",
+    studentId: "hs_003",
+    studentName: "Lê Bảo Nam",
+    nickname: "NamCyber",
+    grade: 8,
+    lessonTitle: "Bài 6: Hằng đẳng thức đáng nhớ",
+    mode: "Tính nhanh",
+    score: 88,
+    stars: 2,
+    accuracy: 85,
+    timeSpent: "1m 45s",
+    timestamp: "20:39:02",
+    status: "passed"
+  },
+  {
+    id: "act_103",
+    studentId: "hs_005",
+    studentName: "Vũ Đức Thắng",
+    nickname: "ThangNinja",
+    grade: 6,
+    lessonTitle: "Bài 16: Phép nhân số nguyên",
+    mode: "Săn quái",
+    score: 52,
+    stars: 1,
+    accuracy: 60,
+    timeSpent: "3m 10s",
+    timestamp: "20:31:40",
+    status: "passed"
+  },
+  {
+    id: "act_104",
+    studentId: "hs_004",
+    studentName: "Phạm Khánh Linh",
+    nickname: "LinhCosmos",
+    grade: 9,
+    lessonTitle: "Bài 19: Công thức nghiệm PT bậc hai",
+    mode: "Đại chiến Boss",
+    score: 110,
+    stars: 3,
+    accuracy: 95,
+    timeSpent: "4m 20s",
+    timestamp: "20:25:11",
+    status: "boss_slain"
+  },
+  {
+    id: "act_105",
+    studentId: "hs_006",
+    studentName: "Hoàng Phi Long",
+    nickname: "LongSieuToc",
+    grade: 8,
+    lessonTitle: "Bài 35: Định lí Pythagore",
+    mode: "Tính nhanh",
+    score: 120,
+    stars: 3,
+    accuracy: 100,
+    timeSpent: "0m 04s",
+    timestamp: "19:55:00",
+    status: "flagged_cheat"
+  }
+];
+
+// Thống kê lỗi sai phổ biến (Error Heatmap Catalog)
+const COMMON_ERROR_STATS = [
+  {
+    code: "miss_cross_term",
+    title: "Quên số hạng 2ab trong hằng đẳng thức",
+    grade: 8,
+    lesson: "Hằng đẳng thức đáng nhớ",
+    formula: "$(a+b)^2 = a^2 + b^2$",
+    correctNotice: "Phải có $2ab$: $(a+b)^2 = a^2 + 2ab + b^2$",
+    failCount: 142,
+    percentage: "58%"
+  },
+  {
+    code: "no_common_denom",
+    title: "Cộng tử với tử, mẫu với mẫu phân số",
+    grade: 6,
+    lesson: "Cộng phân số khác mẫu",
+    formula: "$\\frac{1}{2} + \\frac{1}{3} = \\frac{2}{5}$",
+    correctNotice: "Phải quy đồng mẫu số chung trước khi cộng tử!",
+    failCount: 128,
+    percentage: "49%"
+  },
+  {
+    code: "wrong_sign_mult",
+    title: "Sai dấu khi nhân số âm",
+    grade: 6,
+    lesson: "Phép nhân số nguyên",
+    formula: "(-3) \\times (-4) = -12",
+    correctNotice: "Âm nhân âm thành dương: $(-a) \\times (-b) = ab$",
+    failCount: 96,
+    percentage: "38%"
+  },
+  {
+    code: "viet_sign_error",
+    title: "Nhầm dấu trong định lí Viète",
+    grade: 9,
+    lesson: "Định lí Viète",
+    formula: "x_1 + x_2 = b/a",
+    correctNotice: "Công thức chuẩn có dấu trừ: $x_1 + x_2 = -b/a$",
+    failCount: 84,
+    percentage: "35%"
+  },
+  {
+    code: "arithmetic_sqrt_is_positive",
+    title: "Lấy cả dấu âm cho căn bậc hai số học",
+    grade: 7,
+    lesson: "Căn bậc hai số học",
+    formula: "\\sqrt{49} = \\pm 7",
+    correctNotice: "Căn bậc hai số học của số không âm luôn là số DƯƠNG!",
+    failCount: 79,
+    percentage: "31%"
+  }
+];
+
+  </script>
+  <script>
+// Audio Synthesizer using Web Audio API (Zero external MP3 dependencies)
+class SoundFX {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+    this.initialized = false;
+  }
+
+  init() {
+    if (!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        this.ctx = new AudioContext();
+        this.initialized = true;
+      }
     }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  toggle(enable) {
+    this.enabled = enable !== undefined ? enable : !this.enabled;
+    return this.enabled;
+  }
+
+  playClick() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.04);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.05);
+  }
+
+  playCorrect(combo = 1) {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const baseFreq = 523.25; // C5
+    const semitones = [0, 4, 7, 12, 16]; // Major arpeggio
+    const offset = Math.min(combo - 1, 4);
+
+    [0, 1].forEach((idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const step = semitones[(offset + idx) % semitones.length];
+      const freq = baseFreq * Math.pow(2, step / 12);
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+      gain.gain.setValueAtTime(0.2, now + idx * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + idx * 0.07);
+      osc.stop(now + idx * 0.07 + 0.26);
+    });
+  }
+
+  playWrong() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.26);
+  }
+
+  playCombo() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [587.33, 739.99, 880, 1174.66].forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + i * 0.05);
+      gain.gain.setValueAtTime(0.18, now + i * 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.05);
+      osc.stop(now + i * 0.05 + 0.32);
+    });
+  }
+
+  playBossHit() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    // Low punch
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.32);
+  }
+
+  playVictory() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const startTime = now + idx * 0.12;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0.25, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.45);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.48);
+    });
+  }
+
+  playHint() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.16);
+  }
+}
+
+window.soundFX = new SoundFX();
+
+  </script>
+  <script>
+// Custom Touch & Desktop Math Keypad
+class MathKeypad {
+  constructor() {
+    this.container = null;
+    this.targetInput = null;
+    this.onSubmitCallback = null;
+  }
+
+  attach(inputElement, onSubmit) {
+    this.targetInput = inputElement;
+    this.onSubmitCallback = onSubmit;
+    this.render();
+  }
+
+  render() {
+    let wrap = document.getElementById('math-keypad-container');
+    if (!wrap) return;
+
+    wrap.innerHTML = `
+      <div class="math-keypad">
+        <div class="keypad-row">
+          <button type="button" class="kp-btn kp-fn" data-val="/">/</button>
+          <button type="button" class="kp-btn kp-fn" data-val="^">^</button>
+          <button type="button" class="kp-btn kp-fn" data-val="√">√</button>
+          <button type="button" class="kp-btn kp-fn" data-val="(">(</button>
+          <button type="button" class="kp-btn kp-fn" data-val=")">)</button>
+          <button type="button" class="kp-btn kp-fn" data-val="x">x</button>
+        </div>
+        <div class="keypad-grid">
+          <button type="button" class="kp-btn" data-val="7">7</button>
+          <button type="button" class="kp-btn" data-val="8">8</button>
+          <button type="button" class="kp-btn" data-val="9">9</button>
+          <button type="button" class="kp-btn kp-op" data-val="+">+</button>
+          <button type="button" class="kp-btn kp-del" data-action="backspace">⌫</button>
+
+          <button type="button" class="kp-btn" data-val="4">4</button>
+          <button type="button" class="kp-btn" data-val="5">5</button>
+          <button type="button" class="kp-btn" data-val="6">6</button>
+          <button type="button" class="kp-btn kp-op" data-val="-">-</button>
+          <button type="button" class="kp-btn kp-clear" data-action="clear">C</button>
+
+          <button type="button" class="kp-btn" data-val="1">1</button>
+          <button type="button" class="kp-btn" data-val="2">2</button>
+          <button type="button" class="kp-btn" data-val="3">3</button>
+          <button type="button" class="kp-btn kp-op" data-val="*">×</button>
+          <button type="button" class="kp-btn kp-submit" data-action="submit">✓ Trả lời</button>
+
+          <button type="button" class="kp-btn kp-zero" data-val="0">0</button>
+          <button type="button" class="kp-btn" data-val=".">.</button>
+          <button type="button" class="kp-btn kp-op" data-val="±">±</button>
+          <button type="button" class="kp-btn kp-op" data-val="=">=</button>
+        </div>
+      </div>
+    `;
+
+    wrap.querySelectorAll('.kp-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        window.soundFX?.playClick();
+        const val = btn.getAttribute('data-val');
+        const act = btn.getAttribute('data-action');
+
+        if (!this.targetInput) return;
+
+        if (act === 'backspace') {
+          this.targetInput.value = this.targetInput.value.slice(0, -1);
+        } else if (act === 'clear') {
+          this.targetInput.value = '';
+        } else if (act === 'submit') {
+          if (this.onSubmitCallback) this.onSubmitCallback(this.targetInput.value.trim());
+          return;
+        } else if (val === '±') {
+          if (this.targetInput.value.startsWith('-')) {
+            this.targetInput.value = this.targetInput.value.substring(1);
+          } else {
+            this.targetInput.value = '-' + this.targetInput.value;
+          }
+        } else if (val) {
+          this.targetInput.value += val;
+        }
+
+        // Trigger input event
+        this.targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        this.targetInput.focus();
+      };
+    });
+  }
+
+  detach() {
+    let wrap = document.getElementById('math-keypad-container');
+    if (wrap) wrap.innerHTML = '';
+    this.targetInput = null;
+    this.onSubmitCallback = null;
+  }
+}
+
+window.mathKeypad = new MathKeypad();
+
+  </script>
+  <script>
+// ==========================================================================
+// HÀNH TRÌNH TOÁN HỌC - MAIN CONTROLLER & APPLICATION LOGIC
+// ==========================================================================
+
+class MathApp {
+  constructor() {
+    this.currentRole = 'student'; // 'student' | 'admin'
+    this.currentGrade = 6;
+    this.currentView = 'learn'; // 'learn' | 'review' | 'leaderboard' | 'daily' | 'profile' | 'admin'
+    this.currentStudent = null;
+
+    // Game state
+    this.activeSession = null;
+    this.gameTimer = null;
+    this.remainingSeconds = 0;
+    this.totalSeconds = 30;
+
+    this.initStorage();
+  }
+
+  initStorage() {
+    // Tải hoặc khởi tạo danh sách học sinh
+    if (!localStorage.getItem('htth_students')) {
+      localStorage.setItem('htth_students', JSON.stringify(INITIAL_STUDENTS));
+    }
+    this.students = JSON.parse(localStorage.getItem('htth_students'));
+
+    // Tải hoặc khởi tạo lịch sử hoạt động
+    if (!localStorage.getItem('htth_activities')) {
+      localStorage.setItem('htth_activities', JSON.stringify(INITIAL_ACTIVITY_LOGS));
+    }
+    this.activities = JSON.parse(localStorage.getItem('htth_activities'));
+
+    // Tải hoặc khởi tạo ngân hàng câu hỏi
+    if (!localStorage.getItem('htth_questions')) {
+      localStorage.setItem('htth_questions', JSON.stringify(QUESTION_BANK));
+    }
+    this.questions = JSON.parse(localStorage.getItem('htth_questions'));
+
+    // Học sinh hiện tại đăng nhập (mặc định chọn học sinh đầu tiên)
+    let savedStudentId = localStorage.getItem('htth_current_student_id');
+    this.currentStudent = this.students.find(s => s.id === savedStudentId) || this.students[0];
+    this.currentGrade = this.currentStudent.grade || 6;
+  }
+
+  saveStorage() {
+    localStorage.setItem('htth_students', JSON.stringify(this.students));
+    localStorage.setItem('htth_activities', JSON.stringify(this.activities));
+    localStorage.setItem('htth_questions', JSON.stringify(this.questions));
+    if (this.currentStudent) {
+      localStorage.setItem('htth_current_student_id', this.currentStudent.id);
+    }
+  }
+
+  init() {
+    this.renderHeader();
+    this.renderBottomNav();
+    this.bindGlobalEvents();
+    this.switchView('learn');
+  }
+
+  // Render Math with KaTeX or fallback
+  renderMath(element) {
+    if (!element) return;
+    
+    // Nếu có KaTeX từ CDN
+    if (window.renderMathInElement) {
+      try {
+        window.renderMathInElement(element, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+        return;
+      } catch (e) {
+        console.warn('KaTeX render error:', e);
+      }
+    }
+
+    // Fallback Math Parser nếu offline / không tải được KaTeX CDN
+    let html = element.innerHTML;
+    html = html.replace(/\$([^\$]+)\$/g, (match, formula) => {
+      let parsed = formula
+        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="math-frac"><span class="math-num">$1</span><span class="math-denom">$2</span></span>')
+        .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+        .replace(/\\times/g, '×')
+        .replace(/\\cdot/g, '·')
+        .replace(/\\pm/g, '±')
+        .replace(/\\le/g, '≤')
+        .replace(/\\ge/g, '≥')
+        .replace(/\\ne/g, '≠')
+        .replace(/\\in/g, '∈')
+        .replace(/\\notin/g, '∉')
+        .replace(/\\subset/g, '⊂')
+        .replace(/\\Rightarrow/g, '⇒')
+        .replace(/\\Delta/g, 'Δ')
+        .replace(/\\pi/g, 'π')
+        .replace(/\^([0-9a-zA-Z]+)/g, '<sup>$1</sup>')
+        .replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>')
+        .replace(/_([0-9a-zA-Z]+)/g, '<sub>$1</sub>')
+        .replace(/_\{([^}]+)\}/g, '<sub>$1</sub>');
+      return `<span class="math-render">${parsed}</span>`;
+    });
+    element.innerHTML = html;
+  }
+
+  // Header Bar
+  renderHeader() {
+    const header = document.getElementById('app-header');
+    if (!header) return;
+
+    if (this.currentRole === 'admin') {
+      header.innerHTML = `
+        <div class="brand-section" onclick="app.switchView('admin')">
+          <div class="brand-logo" style="background: linear-gradient(135deg, #ef4444, #f97316);">🛡️</div>
+          <div class="brand-info">
+            <h1>QUẢN TRỊ VIÊN</h1>
+            <p>Bảng theo dõi học sinh & Quản lý</p>
+          </div>
+        </div>
+        <div class="header-stats">
+          <button class="role-pill" onclick="app.toggleRole('student')">
+            <span>🎓</span> Chuyển sang Học sinh
+          </button>
+        </div>
+      `;
+    } else {
+      header.innerHTML = `
+        <div class="brand-section" onclick="app.switchView('learn')">
+          <div class="brand-logo">📐</div>
+          <div class="brand-info">
+            <h1>HÀNH TRÌNH TOÁN HỌC</h1>
+            <p>${this.currentStudent.nickname} • Lớp ${this.currentGrade}</p>
+          </div>
+        </div>
+        <div class="header-stats">
+          <div class="stat-chip energy" title="Năng lượng">
+            <span>❤️</span> <span>${this.currentStudent.energy}/5</span>
+          </div>
+          <div class="stat-chip streak" title="Chuỗi ngày học">
+            <span>🔥</span> <span>${this.currentStudent.streak}</span>
+          </div>
+          <div class="stat-chip xp" title="Điểm kinh nghiệm XP">
+            <span>⚡</span> <span>${this.currentStudent.xp}</span>
+          </div>
+          <button class="role-pill" onclick="app.toggleRole('admin')" title="Vào xem màn hình giáo viên/admin">
+            <span>⚙️</span> Admin
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Bottom Navigation (Mobile)
+  renderBottomNav() {
+    const nav = document.getElementById('bottom-nav');
+    if (!nav) return;
+
+    if (this.currentRole === 'admin') {
+      nav.classList.add('d-none');
+      return;
+    }
+    nav.classList.remove('d-none');
+
+    const items = [
+      { id: 'learn', icon: '🗺️', label: 'Học tập' },
+      { id: 'review', icon: '🧠', label: 'Ôn tập' },
+      { id: 'leaderboard', icon: '🏆', label: 'Xếp hạng' },
+      { id: 'daily', icon: '⭐', label: 'Thử thách' },
+      { id: 'profile', icon: '👤', label: 'Tôi' }
+    ];
+
+    nav.innerHTML = items.map(item => `
+      <button class="nav-item ${this.currentView === item.id ? 'active' : ''}" onclick="app.switchView('${item.id}')">
+        <span class="nav-icon">${item.icon}</span>
+        <span>${item.label}</span>
+      </button>
+    `).join('');
+  }
+
+  toggleRole(targetRole) {
+    window.soundFX?.playClick();
+    this.currentRole = targetRole || (this.currentRole === 'admin' ? 'student' : 'admin');
+    this.renderHeader();
+    this.renderBottomNav();
+    if (this.currentRole === 'admin') {
+      this.switchView('admin');
+    } else {
+      this.switchView('learn');
+    }
+  }
+
+  switchView(viewName) {
+    window.soundFX?.playClick();
+    this.currentView = viewName;
+    this.renderBottomNav();
+
+    const mainContainer = document.getElementById('main-content');
+    if (!mainContainer) return;
+
+    if (this.currentRole === 'admin' || viewName === 'admin') {
+      this.renderAdminView(mainContainer);
+    } else if (viewName === 'learn') {
+      this.renderLearnView(mainContainer);
+    } else if (viewName === 'review') {
+      this.renderReviewView(mainContainer);
+    } else if (viewName === 'leaderboard') {
+      this.renderLeaderboardView(mainContainer);
+    } else if (viewName === 'daily') {
+      this.renderDailyChallengeView(mainContainer);
+    } else if (viewName === 'profile') {
+      this.renderProfileView(mainContainer);
+    }
+
+    this.renderMath(mainContainer);
+  }
+
+  // ========================================================================
+  // VIEW: BẢN ĐỒ HỌC TẬP & CÁC CHƯƠNG (LEARN)
+  // ========================================================================
+  renderLearnView(container) {
+    const kingdom = KINGDOMS.find(k => k.id === this.currentGrade) || KINGDOMS[0];
+
+    container.innerHTML = `
+      <div class="view-container">
+        <!-- Bộ chọn khối lớp / Vương quốc -->
+        <div class="kingdom-selector">
+          ${KINGDOMS.map(k => `
+            <div class="kingdom-tab ${k.id === this.currentGrade ? 'active' : ''}" 
+                 data-grade="${k.id}" 
+                 onclick="app.changeGrade(${k.id})">
+              <span>${k.icon}</span>
+              <span>Lớp ${k.id}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Banner vương quốc -->
+        <div style="background: ${kingdom.bgGradient}; border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff;">${kingdom.name}</h2>
+            <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 4px;">${kingdom.subtitle}</p>
+          </div>
+          <div style="font-size: 42px;">${kingdom.icon}</div>
+        </div>
+
+        <!-- Danh sách các chương và đường đi các bài -->
+        <div class="journey-container">
+          ${kingdom.chapters.map(ch => this.renderChapterSection(ch)).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  renderChapterSection(chapter) {
+    return `
+      <div class="chapter-card">
+        <div class="chapter-header">
+          <div class="chapter-title-group">
+            <h3>Chương ${chapter.number}: ${chapter.title}</h3>
+            <span>${chapter.lessons.length} bài học • Boss: ${chapter.bossName}</span>
+          </div>
+          <div class="chapter-boss-badge" onclick="app.openBossModal('${chapter.id}')" style="cursor: pointer;">
+            <span>${chapter.bossAvatar}</span>
+            <span>Boss cuối</span>
+          </div>
+        </div>
+
+        <!-- Đường mòn các bài học (Candy Crush / Duolingo style) -->
+        <div class="lesson-path">
+          ${chapter.lessons.map((lesson, idx) => {
+            const isCompleted = (this.currentStudent.completedLessons || []).includes(lesson.id);
+            const stars = (this.currentStudent.lessonStars && this.currentStudent.lessonStars[lesson.id]) || (isCompleted ? 3 : 0);
+            return `
+              <div class="path-node-wrapper" onclick="app.openLessonModal('${lesson.id}')">
+                <div class="lesson-bubble ${isCompleted ? 'completed' : ''}">
+                  <span>${isCompleted ? '⭐' : lesson.num}</span>
+                  <div class="node-stars">
+                    ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}
+                  </div>
+                </div>
+                <div class="node-title-label">Bài ${lesson.num}: ${lesson.title}</div>
+              </div>
+            `;
+          }).join('')}
+
+          <!-- Boss cuối chương node -->
+          <div class="path-node-wrapper boss-node" onclick="app.openBossModal('${chapter.id}')">
+            <div class="lesson-bubble boss">
+              <span>${chapter.bossAvatar}</span>
+            </div>
+            <div class="node-title-label" style="color: #f87171; font-weight: 800;">
+              Đại chiến: ${chapter.bossName}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  changeGrade(grade) {
+    this.currentGrade = grade;
+    this.renderHeader();
+    this.renderLearnView(document.getElementById('main-content'));
+    this.renderMath(document.getElementById('main-content'));
+  }
+
+  // Modal chi tiết bài học (B4)
+  openLessonModal(lessonId) {
+    window.soundFX?.playClick();
+    const kingdom = KINGDOMS.find(k => k.id === this.currentGrade);
+    let targetLesson = null;
+    let targetChapter = null;
+
+    for (const ch of kingdom.chapters) {
+      const found = ch.lessons.find(l => l.id === lessonId);
+      if (found) {
+        targetLesson = found;
+        targetChapter = ch;
+        break;
+      }
+    }
+
+    if (!targetLesson) return;
+
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+    
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>Bài ${targetLesson.num}: ${targetLesson.title}</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Chương ${targetChapter.number}: ${targetChapter.title}</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Tóm tắt lý thuyết trọng tâm -->
+        <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-md); padding: 14px;">
+          <h4 style="font-size: 13px; color: #a5b4fc; font-weight: 700; margin-bottom: 4px;">📖 Trọng tâm kiến thức:</h4>
+          <p style="font-size: 13px; color: #e2e8f0;">${targetLesson.focus}</p>
+          <div style="margin-top: 8px; font-size: 12px; color: #38bdf8;">🎮 Thể loại game nổi bật: <strong>${targetLesson.type}</strong></div>
+        </div>
+
+        <h4 style="font-size: 14px; font-weight: 700; color: #f8fafc;">Chọn cấp độ thử thách:</h4>
+        <div class="level-cards-grid">
+          <div class="level-select-card" onclick="app.startLesson('${targetLesson.id}', 1)">
+            <span class="level-badge">Cấp 1: Nhận biết</span>
+            <div style="font-size: 12px; color: #cbd5e1;">10 câu • Khái niệm & 1 bước</div>
+            <div class="level-stars-row" style="color: #fbbf24;">★★★</div>
+          </div>
+          <div class="level-select-card" onclick="app.startLesson('${targetLesson.id}', 2)">
+            <span class="level-badge" style="color: #34d399;">Cấp 2: Thông hiểu</span>
+            <div style="font-size: 12px; color: #cbd5e1;">10 câu • Tính toán 2-3 bước</div>
+            <div class="level-stars-row" style="color: #fbbf24;">★★☆</div>
+          </div>
+          <div class="level-select-card" onclick="app.startLesson('${targetLesson.id}', 3)">
+            <span class="level-badge" style="color: #f59e0b;">Cấp 3: Vận dụng</span>
+            <div style="font-size: 12px; color: #cbd5e1;">3 câu • Tìm lỗi sai, nhiều bước</div>
+            <div class="level-stars-row" style="color: #94a3b8;">☆☆☆</div>
+          </div>
+          <div class="level-select-card" onclick="app.startLesson('${targetLesson.id}', 4)">
+            <span class="level-badge" style="color: #f43f5e;">Cấp 4: Vận dụng cao</span>
+            <div style="font-size: 12px; color: #cbd5e1;">2 câu • Thực tế & bài mẹo</div>
+            <div class="level-stars-row" style="color: #94a3b8;">☆☆☆</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="app.startLesson('${targetLesson.id}', 1)">
+          🚀 Bắt đầu ngay (Cấp 1)
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+    this.renderMath(modalBody);
+  }
+
+  // Modal Boss cuối chương (C4)
+  openBossModal(chapterId) {
+    window.soundFX?.playClick();
+    const kingdom = KINGDOMS.find(k => k.id === this.currentGrade);
+    const chapter = kingdom.chapters.find(c => c.id === chapterId);
+    if (!chapter) return;
+
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3 style="color: #f87171;">⚔️ ĐẠI CHIẾN BOSS CUỐI CHƯƠNG</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Chương ${chapter.number}: ${chapter.title}</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body text-center">
+        <div style="font-size: 64px; margin: 10px 0;">${chapter.bossAvatar}</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #fca5a5;">${chapter.bossName}</h2>
+        <p style="font-size: 13px; color: #cbd5e1; margin: 8px 0 16px;">
+          Boss nắm giữ cổng kết thúc của chương. Vượt qua 5 câu hỏi ngẫu nhiên để hạ gục Boss, giành huy hiệu và kho báu điểm kinh nghiệm!
+        </p>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md); margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 6px;">
+            <span>Máu Boss: ${chapter.bossHp} HP</span>
+            <span>Số câu: 5 câu</span>
+          </div>
+          <div class="boss-hp-bar">
+            <div class="boss-hp-fill" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-danger" style="width: 100%; font-size: 16px; padding: 12px;" onclick="app.startBossBattle('${chapter.id}')">
+          ⚔️ Vào trận Khiêu Chiến!
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  closeModal() {
+    window.soundFX?.playClick();
+    const modal = document.getElementById('app-modal');
+    if (modal) modal.classList.remove('active');
+  }
+
+  // ========================================================================
+  // GAMEPLAY: ARENA & CÂU HỎI (C1 - C3)
+  // ========================================================================
+  startLesson(lessonId, level = 1) {
+    this.closeModal();
+
+    // Lọc câu hỏi phù hợp với khối lớp và bài học hoặc câu hỏi tương tự
+    let questions = this.questions.filter(q => q.grade === this.currentGrade && (q.lesson_id === lessonId || q.level === level));
+    if (questions.length === 0) {
+      questions = this.questions.filter(q => q.grade === this.currentGrade);
+    }
+    // Nếu vẫn ít, lấy từ ngân hàng chung
+    if (questions.length === 0) {
+      questions = this.questions;
+    }
+
+    // Xáo trộn ngẫu nhiên và lấy 3-5 câu cho một lượt chơi linh hoạt
+    const selectedQuestions = [...questions].sort(() => 0.5 - Math.random()).slice(0, 4);
+
+    this.activeSession = {
+      type: 'lesson',
+      lessonId: lessonId,
+      level: level,
+      questions: selectedQuestions,
+      currentIndex: 0,
+      score: 0,
+      combo: 0,
+      correctCount: 0,
+      hintsUsedThisRound: 0,
+      hintsUsedThisQuestion: 0,
+      startTime: Date.now(),
+      wrongQuestions: []
+    };
+
+    this.renderGameArena();
+  }
+
+  startBossBattle(chapterId) {
+    this.closeModal();
+    const kingdom = KINGDOMS.find(k => k.id === this.currentGrade);
+    const chapter = kingdom.chapters.find(c => c.id === chapterId);
+
+    let questions = this.questions.filter(q => q.grade === this.currentGrade);
+    if (questions.length === 0) questions = this.questions;
+    const selectedQuestions = [...questions].sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    this.activeSession = {
+      type: 'boss',
+      chapter: chapter,
+      bossHpMax: chapter.bossHp,
+      bossHpCurrent: chapter.bossHp,
+      questions: selectedQuestions,
+      currentIndex: 0,
+      score: 0,
+      combo: 0,
+      correctCount: 0,
+      hintsUsedThisRound: 0,
+      hintsUsedThisQuestion: 0,
+      startTime: Date.now(),
+      wrongQuestions: []
+    };
+
+    this.renderGameArena();
+  }
+
+  renderGameArena() {
+    const mainContainer = document.getElementById('main-content');
+    if (!mainContainer || !this.activeSession) return;
+
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+    this.totalSeconds = q.time_limit_sec || 30;
+    this.remainingSeconds = this.totalSeconds;
+    s.hintsUsedThisQuestion = 0;
+
+    mainContainer.innerHTML = `
+      <div class="view-container">
+        <div class="game-arena">
+          <!-- Thanh trạng thái thời gian và điểm số -->
+          <div class="game-top-bar">
+            <button class="btn btn-secondary btn-sm" onclick="app.confirmExitGame()">✕ Thoát</button>
+            <div class="timer-bar-wrap">
+              <div id="game-timer-fill" class="timer-bar-fill" style="width: 100%;"></div>
+            </div>
+            <div id="game-combo-box" class="game-combo-pill ${s.combo > 1 ? '' : 'd-none'}">
+              🔥 x${s.combo} Combo
+            </div>
+            <div style="font-weight: 800; color: #38bdf8; font-size: 15px;">
+              ${s.score} đ
+            </div>
+          </div>
+
+          <!-- Màn hình Boss (nếu đang đánh boss) -->
+          ${s.type === 'boss' ? `
+            <div class="boss-arena-header">
+              <div class="boss-avatar-box">${s.chapter.bossAvatar}</div>
+              <div class="boss-info">
+                <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                  <span style="color: #fca5a5;">${s.chapter.bossName}</span>
+                  <span id="boss-hp-text" style="color: #f87171;">${s.bossHpCurrent} / ${s.bossHpMax} HP</span>
+                </div>
+                <div class="boss-hp-bar">
+                  <div id="boss-hp-bar-fill" class="boss-hp-fill" style="width: ${(s.bossHpCurrent / s.bossHpMax) * 100}%;"></div>
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Thẻ câu hỏi chính -->
+          <div class="question-card">
+            <div class="question-header">
+              <span class="question-type-tag">Câu ${s.currentIndex + 1}/${s.questions.length} • Dạng: ${q.type}</span>
+              <button class="btn btn-secondary btn-sm" onclick="app.useHint()">💡 Gợi ý</button>
+            </div>
+
+            <!-- Nội dung câu hỏi stem -->
+            <div class="question-stem" id="question-stem-text">
+              ${q.stem}
+            </div>
+
+            <!-- Khu vực tương tác trả lời tùy theo dạng câu hỏi -->
+            <div id="question-action-area" style="margin-top: 10px;">
+              ${this.renderQuestionActionArea(q)}
+            </div>
+          </div>
+
+          <!-- Bàn phím toán (nếu là dạng NUM) -->
+          <div id="math-keypad-container"></div>
+        </div>
+      </div>
+    `;
+
+    this.renderMath(document.getElementById('question-stem-text'));
+    this.renderMath(document.getElementById('question-action-area'));
+
+    // Gắn bàn phím toán nếu dạng NUM
+    if (q.type === 'NUM') {
+      const numInput = document.getElementById('num-answer-input');
+      if (numInput && window.mathKeypad) {
+        window.mathKeypad.attach(numInput, (val) => this.submitNumAnswer(val));
+      }
+    }
+
+    this.startTimer();
+  }
+
+  renderQuestionActionArea(q) {
+    if (q.type === 'MCQ') {
+      const letters = ['A', 'B', 'C', 'D'];
+      return `
+        <div class="options-grid">
+          ${q.options.map((opt, i) => `
+            <button class="option-btn" onclick="app.submitMcqAnswer(${i}, this)">
+              <span class="option-letter">${letters[i]}</span>
+              <span class="option-text">${opt.text}</span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+    } else if (q.type === 'NUM') {
+      return `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <input type="text" id="num-answer-input" class="form-control" placeholder="Nhập đáp số..." 
+                 style="font-size: 20px; font-weight: 700; text-align: center; height: 50px;" readonly />
+        </div>
+      `;
+    } else if (q.type === 'ERR') {
+      return `
+        <div class="err-steps-list">
+          <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">👉 Hãy bấm trực tiếp vào dòng mà bạn cho rằng bị biến đổi sai:</p>
+          ${q.steps.map(step => `
+            <div class="err-step-card" onclick="app.submitErrAnswer(${step.num}, this)">
+              <span style="font-weight: 600;">${step.text}</span>
+              <span style="font-size: 16px;">🔍</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (q.type === 'ORDER') {
+      return `
+        <div class="order-list" id="order-items-wrap">
+          <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">👉 Di chuyển các bước để sắp xếp đúng thứ tự giải:</p>
+          ${q.items.map((item, idx) => `
+            <div class="order-item" data-id="${item.id}">
+              <span>${item.text}</span>
+              <div class="order-btns-group">
+                <button type="button" class="order-nav-btn" onclick="app.moveOrderItem(${idx}, -1)">▲</button>
+                <button type="button" class="order-nav-btn" onclick="app.moveOrderItem(${idx}, 1)">▼</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 14px;" onclick="app.submitOrderAnswer()">
+          ✓ Xác nhận thứ tự
+        </button>
+      `;
+    }
+
+    return `<button class="btn btn-primary" onclick="app.proceedNextQuestion(true)">Tiếp tục</button>`;
+  }
+
+  // Timer loop
+  startTimer() {
+    clearInterval(this.gameTimer);
+    const timerFill = document.getElementById('game-timer-fill');
+
+    this.gameTimer = setInterval(() => {
+      this.remainingSeconds -= 0.1;
+      const pct = Math.max(0, (this.remainingSeconds / this.totalSeconds) * 100);
+
+      if (timerFill) {
+        timerFill.style.width = pct + '%';
+        if (pct < 25) {
+          timerFill.className = 'timer-bar-fill danger';
+        } else if (pct < 50) {
+          timerFill.className = 'timer-bar-fill warning';
+        } else {
+          timerFill.className = 'timer-bar-fill';
+        }
+      }
+
+      if (this.remainingSeconds <= 0) {
+        clearInterval(this.gameTimer);
+        this.handleTimeout();
+      }
+    }, 100);
+  }
+
+  handleTimeout() {
+    window.soundFX?.playWrong();
+    this.showExplanationModal(false, null, "Hết thời gian trả lời!");
+  }
+
+  useHint() {
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+    if (!q.hints || q.hints.length === 0) {
+      alert("Câu này không có thêm gợi ý!");
+      return;
+    }
+    window.soundFX?.playHint();
+    s.hintsUsedThisRound++;
+    s.hintsUsedThisQuestion = Math.min(2, s.hintsUsedThisQuestion + 1);
+
+    const hintText = q.hints[s.hintsUsedThisQuestion - 1] || q.hints[0];
+    alert(`💡 GỢI Ý (${s.hintsUsedThisQuestion}/2):\n${hintText}`);
+  }
+
+  // Submit MCQ Answer
+  submitMcqAnswer(optIndex, btnElement) {
+    clearInterval(this.gameTimer);
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+    const selectedOpt = q.options[optIndex];
+
+    const allBtns = document.querySelectorAll('.option-btn');
+    allBtns.forEach(b => b.disabled = true);
+
+    if (selectedOpt.correct) {
+      btnElement.classList.add('correct');
+      this.handleAnswerResult(true, selectedOpt);
+    } else {
+      btnElement.classList.add('wrong');
+      // Highlight correct one
+      const correctIdx = q.options.findIndex(o => o.correct);
+      if (allBtns[correctIdx]) allBtns[correctIdx].classList.add('correct');
+      this.handleAnswerResult(false, selectedOpt);
+    }
+  }
+
+  // Submit NUM Answer
+  submitNumAnswer(val) {
+    if (!val) return;
+    clearInterval(this.gameTimer);
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+
+    const isCorrect = String(val).trim() === String(q.correct_num).trim();
+    this.handleAnswerResult(isCorrect, null, isCorrect ? null : `Đáp án đúng là: ${q.correct_num}`);
+  }
+
+  // Submit ERR Answer (Thám tử lỗi sai)
+  submitErrAnswer(stepNum, element) {
+    clearInterval(this.gameTimer);
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+
+    const isCorrect = stepNum === q.wrong_step_num;
+    if (isCorrect) {
+      element.classList.add('selected-wrong');
+      element.style.borderColor = '#10b981';
+      element.style.background = 'rgba(16, 185, 129, 0.2)';
+    } else {
+      element.classList.add('selected-wrong');
+    }
+
+    this.handleAnswerResult(isCorrect, null, q.explain);
+  }
+
+  // Submit ORDER Answer
+  moveOrderItem(index, direction) {
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= q.items.length) return;
+
+    const temp = q.items[index];
+    q.items[index] = q.items[newIdx];
+    q.items[newIdx] = temp;
+
+    // Rerender order wrap
+    const wrap = document.getElementById('question-action-area');
+    if (wrap) {
+      wrap.innerHTML = this.renderQuestionActionArea(q);
+      this.renderMath(wrap);
+    }
+  }
+
+  submitOrderAnswer() {
+    clearInterval(this.gameTimer);
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+    const currentOrder = q.items.map(i => i.id);
+
+    const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(q.correct_order);
+    this.handleAnswerResult(isCorrect, null);
+  }
+
+  // Handle Result of Answer (Scoring formula from section 9)
+  handleAnswerResult(isCorrect, selectedOpt = null, customExplain = null) {
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+
+    if (isCorrect) {
+      s.correctCount++;
+      s.combo++;
+      window.soundFX?.playCorrect(s.combo);
+
+      // Công thức điểm Section 9:
+      // D = C * (1 + 0.3 * t) * (1 + 0.05 * k) * (1 - 0.25 * g)
+      const basePoints = [10, 15, 20, 30][(s.level || 1) - 1] || 10;
+      const t = Math.max(0, Math.min(1, this.remainingSeconds / this.totalSeconds));
+      const k = Math.min(5, s.combo);
+      const g = Math.min(2, s.hintsUsedThisQuestion);
+
+      const earned = Math.round(basePoints * (1 + 0.3 * t) * (1 + 0.05 * k) * (1 - 0.25 * g));
+      s.score += earned;
+
+      // Boss hit animation
+      if (s.type === 'boss') {
+        const damage = Math.round(s.bossHpMax / s.questions.length);
+        s.bossHpCurrent = Math.max(0, s.bossHpCurrent - damage);
+        window.soundFX?.playBossHit();
+      }
+    } else {
+      s.combo = 0; // Ngắt chuỗi combo
+      window.soundFX?.playWrong();
+      s.wrongQuestions.push(q);
+    }
+
+    this.showExplanationModal(isCorrect, selectedOpt, customExplain);
+  }
+
+  // Modal giải thích sau câu (C2) kèm lỗi sai phổ biến
+  showExplanationModal(isCorrect, selectedOpt, customExplain) {
+    const s = this.activeSession;
+    const q = s.questions[s.currentIndex];
+
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    let errorReasonHtml = '';
+    if (!isCorrect && selectedOpt && selectedOpt.explain) {
+      errorReasonHtml = `
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-md); padding: 12px; margin: 10px 0;">
+          <div style="font-weight: 700; color: #fca5a5; font-size: 13px;">⚠️ Phát hiện lỗi sai thường gặp:</div>
+          <div style="color: #fecaca; font-size: 13px; margin-top: 4px;">${selectedOpt.explain}</div>
+        </div>
+      `;
+    } else if (!isCorrect && customExplain) {
+      errorReasonHtml = `
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-md); padding: 12px; margin: 10px 0;">
+          <div style="font-weight: 700; color: #fca5a5; font-size: 13px;">⚠️ Lỗi cần chú ý:</div>
+          <div style="color: #fecaca; font-size: 13px; margin-top: 4px;">${customExplain}</div>
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <h3 style="color: ${isCorrect ? '#34d399' : '#f87171'};">
+          ${isCorrect ? '🎉 CHÍNH XÁC!' : '❌ CHƯA CHÍNH XÁC'}
+        </h3>
+      </div>
+      <div class="modal-body">
+        ${errorReasonHtml}
+
+        <!-- Lời giải từng bước -->
+        <div style="background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--border);">
+          <h4 style="font-size: 13px; color: #a5b4fc; font-weight: 700; margin-bottom: 6px;">📝 Lời giải chi tiết:</h4>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #cbd5e1;">
+            ${(q.solution_steps || ['Áp dụng đúng công thức và quy tắc toán học.']).map(step => `<div>• ${step}</div>`).join('')}
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.proceedNextQuestion()">
+          ${s.currentIndex + 1 < s.questions.length ? 'Câu tiếp theo ➔' : 'Xem kết quả chung cuộc 🏆'}
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+    this.renderMath(modalBody);
+  }
+
+  proceedNextQuestion() {
+    this.closeModal();
+    const s = this.activeSession;
+    s.currentIndex++;
+
+    if (s.currentIndex < s.questions.length) {
+      this.renderGameArena();
+    } else {
+      this.finishSession();
+    }
+  }
+
+  // Kết thúc lượt chơi & Tính sao (C3)
+  finishSession() {
+    clearInterval(this.gameTimer);
+    const s = this.activeSession;
+    const accuracy = Math.round((s.correctCount / s.questions.length) * 100);
+
+    // Quy tắc đạt sao (Section 2)
+    let stars = 0;
+    if (accuracy >= 95 && s.hintsUsedThisRound <= 1) stars = 3;
+    else if (accuracy >= 80) stars = 2;
+    else if (accuracy >= 60) stars = 1;
+
+    // Cộng XP cho học sinh
+    const earnedXp = s.score + (stars * 20);
+    this.currentStudent.xp += earnedXp;
+    this.currentStudent.gamesPlayed = (this.currentStudent.gamesPlayed || 0) + 1;
+
+    // Đánh dấu hoàn thành bài
+    if (s.type === 'lesson') {
+      if (!this.currentStudent.completedLessons) this.currentStudent.completedLessons = [];
+      if (!this.currentStudent.completedLessons.includes(s.lessonId)) {
+        this.currentStudent.completedLessons.push(s.lessonId);
+      }
+      if (!this.currentStudent.lessonStars) this.currentStudent.lessonStars = {};
+      this.currentStudent.lessonStars[s.lessonId] = Math.max(this.currentStudent.lessonStars[s.lessonId] || 0, stars);
+    }
+
+    // Ghi nhật ký hoạt động thời gian thực cho Admin theo dõi
+    const timeSpentSec = Math.round((Date.now() - s.startTime) / 1000);
+    const timeFormatted = `${Math.floor(timeSpentSec / 60)}m ${timeSpentSec % 60}s`;
+
+    const newActivity = {
+      id: 'act_' + Date.now(),
+      studentId: this.currentStudent.id,
+      studentName: this.currentStudent.name,
+      nickname: this.currentStudent.nickname,
+      grade: this.currentGrade,
+      lessonTitle: s.type === 'boss' ? `Đại chiến Boss: ${s.chapter.bossName}` : `Bài tập Cấp ${s.level}`,
+      mode: s.type === 'boss' ? 'Đại chiến Boss' : 'Tính nhanh',
+      score: s.score,
+      stars: stars,
+      accuracy: accuracy,
+      timeSpent: timeFormatted,
+      timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      status: timeSpentSec < 5 && accuracy === 100 ? 'flagged_cheat' : (stars > 0 ? 'passed' : 'failed')
+    };
+
+    this.activities.unshift(newActivity);
+    this.saveStorage();
+
+    if (stars > 0) window.soundFX?.playVictory();
+
+    // Hiển thị modal kết quả
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <h3>🏆 KẾT QUẢ LƯỢT CHƠI</h3>
+      </div>
+      <div class="modal-body text-center">
+        <!-- Huy hiệu sao -->
+        <div style="font-size: 42px; color: #fbbf24; margin: 10px 0; letter-spacing: 6px;">
+          ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}
+        </div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #f8fafc;">
+          ${stars === 3 ? 'Tuyệt đỉnh Toán học!' : (stars >= 1 ? 'Chúc mừng bạn đã vượt qua!' : 'Cố gắng thêm một chút nhé!')}
+        </h2>
+
+        <!-- Bảng thống kê điểm & kinh nghiệm -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px;">
+            <div style="font-size: 11px; color: var(--text-muted);">ĐIỂM ĐẠT ĐƯỢC</div>
+            <div style="font-size: 22px; font-weight: 800; color: #38bdf8;">${s.score}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px;">
+            <div style="font-size: 11px; color: var(--text-muted);">KINH NGHIỆM (XP)</div>
+            <div style="font-size: 22px; font-weight: 800; color: #10b981;">+${earnedXp}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px;">
+            <div style="font-size: 11px; color: var(--text-muted);">ĐỘ CHÍNH XÁC</div>
+            <div style="font-size: 22px; font-weight: 800; color: #f59e0b;">${accuracy}%</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px;">
+            <div style="font-size: 11px; color: var(--text-muted);">THỜI GIAN</div>
+            <div style="font-size: 22px; font-weight: 800; color: #a78bfa;">${timeFormatted}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" style="flex: 1;" onclick="app.switchView('learn'); app.closeModal();">
+            Về Bản Đồ
+          </button>
+          <button class="btn btn-primary" style="flex: 1;" onclick="app.switchView('leaderboard'); app.closeModal();">
+            Xem Bảng Hạng 🏅
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  confirmExitGame() {
+    if (confirm("Bạn có chắc chắn muốn rời trận? Lượt chơi hiện tại sẽ không được lưu điểm.")) {
+      clearInterval(this.gameTimer);
+      this.activeSession = null;
+      this.switchView('learn');
+    }
+  }
+
+  // ========================================================================
+  // VIEW: ÔN TẬP THÔNG MINH (SPACED REPETITION) & THỬ THÁCH NGÀY
+  // ========================================================================
+  renderReviewView(container) {
+    container.innerHTML = `
+      <div class="view-container">
+        <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: var(--radius-lg); padding: 20px; color: white;">
+          <h2 style="font-size: 20px; font-weight: 800;">🧠 ÔN TẬP THÔNG MINH (Spaced Repetition)</h2>
+          <p style="font-size: 13px; opacity: 0.9; margin-top: 4px;">
+            Hệ thống tự động ghi nhớ các câu hỏi bạn từng làm sai và nhắc lại sau 1, 3, 7, 14 ngày để biến điểm yếu thành thế mạnh!
+          </p>
+        </div>
+
+        <div class="chapter-card" style="padding: 16px;">
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">Các câu hỏi đến hạn ôn tập hôm nay:</h3>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border-left: 4px solid #ef4444;">
+              <div style="font-size: 12px; color: #fca5a5; font-weight: 700;">Hằng đẳng thức đáng nhớ (Lớp 8)</div>
+              <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">Khai triển hằng đẳng thức $(x + 3)^2$</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Lỗi ghi nhận: Quên số hạng $2ab$ • Đã nhắc lại: 2 lần</div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: var(--radius-md); border-left: 4px solid #f59e0b;">
+              <div style="font-size: 12px; color: #fbbf24; font-weight: 700;">Phép cộng phân số khác mẫu (Lớp 6)</div>
+              <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">Tính $\\frac{1}{2} + \\frac{1}{3}$</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Lỗi ghi nhận: Cộng trực tiếp tử và mẫu mà không quy đồng</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="app.startSmartReview()">
+            ⚡ Bắt đầu vòng Ôn Tập Nhanh
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  startSmartReview() {
+    let reviewQuestions = this.questions.slice(0, 3);
+    this.activeSession = {
+      type: 'review',
+      questions: reviewQuestions,
+      currentIndex: 0,
+      score: 0,
+      combo: 0,
+      correctCount: 0,
+      hintsUsedThisRound: 0,
+      hintsUsedThisQuestion: 0,
+      startTime: Date.now(),
+      wrongQuestions: []
+    };
+    this.renderGameArena();
+  }
+
+  renderDailyChallengeView(container) {
+    container.innerHTML = `
+      <div class="view-container">
+        <div style="background: linear-gradient(135deg, #d97706, #b45309); border-radius: var(--radius-lg); padding: 20px; color: white;">
+          <h2 style="font-size: 20px; font-weight: 800;">⭐ THỬ THÁCH NGÀY (Daily Quest)</h2>
+          <p style="font-size: 13px; opacity: 0.9; margin-top: 4px;">
+            Mỗi ngày 5 câu hỏi toán học chọn lọc dành cho toàn thể học sinh cả nước. Thi đua giành vé vào Bảng vàng ngày!
+          </p>
+        </div>
+
+        <div class="chapter-card" style="padding: 20px; text-align: center;">
+          <div style="font-size: 54px; margin-bottom: 8px;">🎯</div>
+          <h3 style="font-size: 18px; font-weight: 800;">Thử Thách Toán Học Ngày Hôm Nay</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0 16px;">
+            Bộ 5 câu hỏi tổng hợp kiến thức Lớp ${this.currentGrade} • Thưởng: +150 XP & Huy hiệu "Chiến binh kiên trì"
+          </p>
+
+          <button class="btn btn-primary" style="padding: 12px 32px; font-size: 16px;" onclick="app.startSmartReview()">
+            🚀 Làm bài thử thách ngay
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ========================================================================
+  // VIEW: BẢNG XẾP HẠNG (LEADERBOARDS & LEAGUES)
+  // ========================================================================
+  renderLeaderboardView(container) {
+    // Sắp xếp học sinh theo XP
+    const sortedStudents = [...this.students]
+      .filter(s => s.status !== 'banned')
+      .sort((a, b) => b.xp - a.xp);
+
+    container.innerHTML = `
+      <div class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 20px; font-weight: 800;">🏆 BẢNG XẾP HẠNG</h2>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" style="background: #4f46e5;">Toàn Quốc</button>
+            <button class="btn btn-secondary btn-sm">Trường</button>
+            <button class="btn btn-secondary btn-sm">Lớp</button>
+          </div>
+        </div>
+
+        <!-- Giải đấu tuần (Weekly League) -->
+        <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(15, 23, 42, 0.8)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 28px;">💎</span>
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: #7dd3fc;">GIẢI ĐẤU KIM CƯƠNG • BẢNG A</div>
+              <div style="font-size: 11px; color: var(--text-muted);">Top 5 thăng hạng lên Cao Thủ • Kết thúc sau: 2 ngày 14 giờ</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danh sách bảng xếp hạng -->
+        <div class="leaderboard-list">
+          ${sortedStudents.map((st, idx) => {
+            const isMe = st.id === this.currentStudent.id;
+            let rankClass = '';
+            if (idx === 0) rankClass = 'top-1';
+            else if (idx === 1) rankClass = 'top-2';
+            else if (idx === 2) rankClass = 'top-3';
+
+            return `
+              <div class="lb-row ${rankClass}" style="${isMe ? 'border-color: #10b981; background: rgba(16, 185, 129, 0.1);' : ''}">
+                <div class="lb-rank">
+                  ${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : idx + 1))}
+                </div>
+                <div class="lb-student">
+                  <div class="lb-avatar">${st.avatar}</div>
+                  <div>
+                    <div class="lb-name">
+                      ${st.nickname} ${isMe ? '<span style="color: #34d399; font-size: 11px;">(Bạn)</span>' : ''}
+                    </div>
+                    <div class="lb-sub">${st.school} • ${st.classCode} • Cấp ${st.level}</div>
+                  </div>
+                </div>
+                <div class="lb-score">
+                  ${st.xp} XP
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ========================================================================
+  // VIEW: HỒ SƠ CÁ NHÂN (PROFILE)
+  // ========================================================================
+  renderProfileView(container) {
+    const st = this.currentStudent;
+    container.innerHTML = `
+      <div class="view-container">
+        <div class="chapter-card" style="padding: 20px; display: flex; align-items: center; gap: 16px;">
+          <div style="font-size: 54px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border: 2px solid #6366f1;">
+            ${st.avatar}
+          </div>
+          <div>
+            <h2 style="font-size: 20px; font-weight: 800;">${st.nickname}</h2>
+            <div style="font-size: 13px; color: var(--text-muted);">${st.name} • ${st.school}</div>
+            <div style="font-size: 12px; color: #38bdf8; font-weight: 700; margin-top: 4px;">Khối Lớp ${st.grade} • Lớp ${st.classCode}</div>
+          </div>
+        </div>
+
+        <!-- Thống kê tổng quan -->
+        <div class="admin-kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">TỔNG XP</span>
+            <span class="kpi-value" style="color: #38bdf8;">${st.xp}</span>
+            <span class="kpi-sub">Cấp độ ${st.level}</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">CHUỖI NGÀY</span>
+            <span class="kpi-value" style="color: #f59e0b;">${st.streak} 🔥</span>
+            <span class="kpi-sub">Kỷ lục liên tiếp</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">SAO ĐẠT ĐƯỢC</span>
+            <span class="kpi-value" style="color: #fbbf24;">${st.stars} ⭐</span>
+            <span class="kpi-sub">Qua các cấp độ</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">ĐỘ CHÍNH XÁC</span>
+            <span class="kpi-value" style="color: #10b981;">${st.accuracy}%</span>
+            <span class="kpi-sub">Trung bình các bài</span>
+          </div>
+        </div>
+
+        <!-- Bộ sưu tập Huy hiệu -->
+        <div class="chapter-card" style="padding: 16px;">
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">🎖️ Huy hiệu đã đạt được:</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 28px;">🧮</div>
+              <div style="font-size: 12px; font-weight: 700; margin-top: 4px;">Bậc Thầy Phân Số</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 28px;">🔍</div>
+              <div style="font-size: 12px; font-weight: 700; margin-top: 4px;">Thám Tử Lỗi Sai</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 28px;">⚔️</div>
+              <div style="font-size: 12px; font-weight: 700; margin-top: 4px;">Chiến Binh Diệt Boss</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ========================================================================
+  // VIEW: QUẢN TRỊ VIÊN (ADMIN DASHBOARD & REALTIME TRACKING)
+  // ========================================================================
+  renderAdminView(container) {
+    const totalStudents = this.students.length;
+    const activeToday = this.students.filter(s => s.status !== 'banned').length;
+    const totalSessions = this.activities.length;
+    const avgAccuracy = Math.round(this.students.reduce((acc, s) => acc + (s.accuracy || 80), 0) / (totalStudents || 1));
+
+    container.innerHTML = `
+      <div class="view-container admin-container">
+        <!-- Tiêu đề & thanh công cụ Admin -->
+        <div class="admin-header-row">
+          <div>
+            <h2 style="font-size: 22px; font-weight: 800; color: #fff;">📊 TRUNG TÂM QUẢN TRỊ VIÊN</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">Theo dõi hoạt động thời gian thực của học sinh và quản lý nội dung</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Câu Hỏi Mới</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.exportDataJson()">📥 Xuất Dữ Liệu</button>
+          </div>
+        </div>
+
+        <!-- 4 Thẻ chỉ số tổng quan (KPIs) -->
+        <div class="admin-kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">TỔNG HỌC SINH</span>
+            <span class="kpi-value">${totalStudents}</span>
+            <span class="kpi-sub">Đã đăng ký hệ thống</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">HỌC SINH HOẠT ĐỘNG HÔM NAY</span>
+            <span class="kpi-value" style="color: #10b981;">${activeToday}</span>
+            <span class="kpi-sub">95% tỷ lệ duy trì</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">LƯỢT CHƠI ĐÃ THỰC HIỆN</span>
+            <span class="kpi-value" style="color: #38bdf8;">${totalSessions}</span>
+            <span class="kpi-sub">Bao gồm Boss & Luyện tập</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">ĐỘ CHÍNH XÁC TRUNG BÌNH</span>
+            <span class="kpi-value" style="color: #fbbf24;">${avgAccuracy}%</span>
+            <span class="kpi-sub">Trên toàn hệ thống</span>
+          </div>
+        </div>
+
+        <!-- Thanh chuyển đổi danh mục quản trị -->
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" id="tab-btn-activity" onclick="app.switchAdminTab('activity')">
+            🔴 Nhật Ký Hoạt Động Thời Gian Thực
+          </button>
+          <button class="admin-tab-btn" id="tab-btn-students" onclick="app.switchAdminTab('students')">
+            👥 Danh Sách Học Sinh (${totalStudents})
+          </button>
+          <button class="admin-tab-btn" id="tab-btn-errors" onclick="app.switchAdminTab('errors')">
+            🔥 Những Chỗ Học Sinh Hay Sai (Heatmap)
+          </button>
+          <button class="admin-tab-btn" id="tab-btn-questions" onclick="app.switchAdminTab('questions')">
+            📚 Ngân Hàng Câu Hỏi (${this.questions.length})
+          </button>
+        </div>
+
+        <!-- Nội dung Tab được hiển thị -->
+        <div id="admin-tab-content">
+          ${this.renderAdminActivityTab()}
+        </div>
+      </div>
+    `;
+  }
+
+  switchAdminTab(tabName) {
+    window.soundFX?.playClick();
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById(`tab-btn-${tabName}`);
+    if (btn) btn.classList.add('active');
+
+    const contentArea = document.getElementById('admin-tab-content');
+    if (!contentArea) return;
+
+    if (tabName === 'activity') {
+      contentArea.innerHTML = this.renderAdminActivityTab();
+    } else if (tabName === 'students') {
+      contentArea.innerHTML = this.renderAdminStudentsTab();
+    } else if (tabName === 'errors') {
+      contentArea.innerHTML = this.renderAdminErrorsTab();
+    } else if (tabName === 'questions') {
+      contentArea.innerHTML = this.renderAdminQuestionsTab();
+    }
+
+    this.renderMath(contentArea);
+  }
+
+  // TAB 1: NHẬT KÝ HOẠT ĐỘNG THỜI GIAN THỰC (LIVE ACTIVITY FEED)
+  renderAdminActivityTab() {
+    return `
+      <div class="table-card">
+        <div style="padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 15px; font-weight: 700;">📡 Dòng sự kiện luyện tập vừa diễn ra:</h3>
+          <span style="font-size: 12px; color: #10b981; display: flex; align-items: center; gap: 6px;">
+            <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+            Tự động cập nhật
+          </span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Thời Gian</th>
+                <th>Học Sinh</th>
+                <th>Khối Lớp</th>
+                <th>Bài Học & Chế Độ</th>
+                <th>Điểm / Sao</th>
+                <th>Độ Chính Xác</th>
+                <th>Thời Lượng</th>
+                <th>Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${this.activities.map(act => `
+                <tr>
+                  <td style="color: var(--text-muted);">${act.timestamp}</td>
+                  <td>
+                    <strong>${act.studentName}</strong>
+                    <div style="font-size: 11px; color: var(--text-muted);">${act.nickname}</div>
+                  </td>
+                  <td>Lớp ${act.grade}</td>
+                  <td>
+                    <div>${act.lessonTitle}</div>
+                    <span style="font-size: 11px; color: #38bdf8;">${act.mode}</span>
+                  </td>
+                  <td>
+                    <span style="color: #38bdf8; font-weight: 700;">${act.score} đ</span>
+                    <span style="color: #fbbf24; margin-left: 4px;">${'★'.repeat(act.stars || 0)}</span>
+                  </td>
+                  <td>
+                    <span style="font-weight: 700; color: ${act.accuracy >= 80 ? '#10b981' : (act.accuracy >= 50 ? '#f59e0b' : '#ef4444')};">
+                      ${act.accuracy}%
+                    </span>
+                  </td>
+                  <td>${act.timeSpent}</td>
+                  <td>
+                    ${act.status === 'flagged_cheat' ? `
+                      <span class="tag-badge flagged">⚠️ Nghi vấn hack</span>
+                      <button class="btn btn-danger btn-sm" style="margin-left: 6px; padding: 2px 6px;" onclick="app.banStudent('${act.studentId}')">Xử lý</button>
+                    ` : (act.status === 'boss_slain' ? `
+                      <span class="tag-badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">⚔️ Diệt Boss</span>
+                    ` : `
+                      <span class="tag-badge active">✓ Hoàn thành</span>
+                    `)}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // TAB 2: DANH SÁCH HỌC SINH & CHI TIẾT
+  renderAdminStudentsTab() {
+    return `
+      <div class="table-card">
+        <div style="padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <h3 style="font-size: 15px; font-weight: 700;">Hồ sơ học sinh tham gia học tập:</h3>
+          <input type="text" placeholder="Tìm tên, trường, lớp..." class="form-control" style="width: 240px; padding: 6px 12px; font-size: 13px;" oninput="app.filterStudentsList(this.value)" />
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="students-admin-table">
+            <thead>
+              <tr>
+                <th>Học Sinh</th>
+                <th>Khối Lớp</th>
+                <th>Trường / Lớp</th>
+                <th>XP & Cấp</th>
+                <th>Tổng Sao</th>
+                <th>Độ Chính Xác</th>
+                <th>Hoạt Động Cuối</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${this.students.map(st => `
+                <tr>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 20px;">${st.avatar}</span>
+                      <div>
+                        <strong>${st.name}</strong>
+                        <div style="font-size: 11px; color: var(--text-muted);">${st.nickname} (${st.username})</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Lớp ${st.grade}</td>
+                  <td>${st.school} <br/><span style="color: var(--text-muted); font-size: 11px;">Mã lớp: ${st.classCode}</span></td>
+                  <td>
+                    <span style="color: #38bdf8; font-weight: 700;">${st.xp} XP</span>
+                    <div style="font-size: 11px; color: var(--text-muted);">Cấp độ ${st.level}</div>
+                  </td>
+                  <td><span style="color: #fbbf24; font-weight: 700;">${st.stars} ⭐</span></td>
+                  <td><span style="color: #10b981; font-weight: 700;">${st.accuracy}%</span></td>
+                  <td style="color: var(--text-muted);">${st.lastActive}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="app.inspectStudent('${st.id}')">Xem Chi Tiết</button>
+                    ${st.status === 'flagged' ? `
+                      <button class="btn btn-danger btn-sm" style="margin-left: 4px;" onclick="app.resetStudentScore('${st.id}')">Reset Điểm</button>
+                    ` : ''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // TAB 3: HEATMAP NHỮNG CHỖ HỌC SINH HAY SAI (ERROR HEATMAP)
+  renderAdminErrorsTab() {
+    return `
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-lg); padding: 16px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #fca5a5;">🔥 THỐNG KÊ NHỮNG LỖI SAI TOÁN HỌC PHỔ BIẾN NHẤT</h3>
+          <p style="font-size: 13px; color: #fecaca; margin-top: 4px;">
+            Hệ thống tự động phân loại đáp án nhiễu theo mã lỗi sai để giúp thầy cô biết học sinh đang vướng mắc ở khái niệm nào:
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px;">
+          ${COMMON_ERROR_STATS.map(err => `
+            <div class="chapter-card" style="padding: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <span class="tag-badge" style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe; margin-bottom: 6px;">
+                    Lớp ${err.grade} • ${err.lesson}
+                  </span>
+                  <h4 style="font-size: 15px; font-weight: 700; color: #f8fafc;">${err.title}</h4>
+                </div>
+                <div style="font-size: 22px; font-weight: 800; color: #ef4444;">${err.percentage}</div>
+              </div>
+
+              <!-- Thanh tỉ lệ lỗi -->
+              <div style="height: 8px; background: rgba(0,0,0,0.4); border-radius: var(--radius-full); margin: 12px 0; overflow: hidden;">
+                <div style="height: 100%; width: ${err.percentage}; background: linear-gradient(to right, #f59e0b, #ef4444);"></div>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 8px;">
+                <span style="color: #f87171; font-weight: 700;">Học sinh hay viết:</span> 
+                <span class="math-target">${err.formula}</span>
+              </div>
+
+              <div style="color: #34d399; font-size: 12px; font-weight: 600;">
+                💡 Khắc phục: <span class="math-target">${err.correctNotice}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // TAB 4: QUẢN LÝ NGÂN HÀNG CÂU HỎI
+  renderAdminQuestionsTab() {
+    return `
+      <div class="table-card">
+        <div style="padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <h3 style="font-size: 15px; font-weight: 700;">Kho câu hỏi có sẵn (Xem trước KaTeX):</h3>
+          <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Câu Hỏi</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã ID</th>
+                <th>Khối</th>
+                <th>Dạng</th>
+                <th>Cấp Độ</th>
+                <th>Nội Dung Câu Hỏi (KaTeX)</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${this.questions.map(q => `
+                <tr>
+                  <td style="color: var(--text-muted); font-size: 11px;">${q.id}</td>
+                  <td>Lớp ${q.grade}</td>
+                  <td><span class="tag-badge" style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe;">${q.type}</span></td>
+                  <td>Cấp ${q.level}</td>
+                  <td style="max-width: 400px;">
+                    <div>${q.stem}</div>
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="app.previewQuestion('${q.id}')">Xem Thử</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // Xem chi tiết học sinh
+  inspectStudent(studentId) {
+    const st = this.students.find(s => s.id === studentId);
+    if (!st) return;
+
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 28px;">${st.avatar}</span>
+          <div>
+            <h3>${st.name} (${st.nickname})</h3>
+            <p style="font-size: 12px; color: var(--text-muted);">${st.school} • ${st.classCode} • Khối Lớp ${st.grade}</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="admin-kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">TỔNG XP</span>
+            <span class="kpi-value">${st.xp}</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">SỐ LƯỢT CHƠI</span>
+            <span class="kpi-value">${st.gamesPlayed}</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">TỔNG SAO</span>
+            <span class="kpi-value" style="color: #fbbf24;">${st.stars} ⭐</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">ĐỘ CHÍNH XÁC</span>
+            <span class="kpi-value" style="color: #10b981;">${st.accuracy}%</span>
+          </div>
+        </div>
+
+        ${st.flagReason ? `
+          <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 12px;">
+            <div style="color: #fca5a5; font-weight: 700; font-size: 13px;">⚠️ CẢNH BÁO GIAN LẬN:</div>
+            <div style="color: #fecaca; font-size: 13px; margin-top: 4px;">${st.flagReason}</div>
+          </div>
+        ` : ''}
+
+        <h4 style="font-size: 14px; font-weight: 700; color: #f8fafc; margin-top: 10px;">Thao tác quản trị viên:</h4>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" onclick="app.resetStudentScore('${st.id}')">Reset Điểm Về 0</button>
+          <button class="btn btn-danger" onclick="app.banStudent('${st.id}')">Khóa Tài Khoản Này</button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  resetStudentScore(studentId) {
+    const st = this.students.find(s => s.id === studentId);
+    if (!st) return;
+    if (confirm(`Bạn có chắc chắn muốn reset điểm của học sinh ${st.name}?`)) {
+      st.xp = 0;
+      st.stars = 0;
+      st.status = 'active';
+      st.flagReason = null;
+      this.saveStorage();
+      alert("Đã reset điểm thành công!");
+      this.closeModal();
+      this.switchAdminTab('students');
+    }
+  }
+
+  banStudent(studentId) {
+    const st = this.students.find(s => s.id === studentId);
+    if (!st) return;
+    if (confirm(`Bạn có chắc muốn đình chỉ tài khoản của ${st.name}?`)) {
+      st.status = 'banned';
+      this.saveStorage();
+      alert("Đã đình chỉ tài khoản thành công!");
+      this.closeModal();
+      this.switchAdminTab('students');
+    }
+  }
+
+  openAddQuestionModal() {
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <h3>+ THÊM CÂU HỎI MỚI VÀO KHO ĐỀ</h3>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Khối lớp:</label>
+          <select id="new-q-grade" class="form-control">
+            <option value="6">Lớp 6 (Vương quốc Rừng Xanh)</option>
+            <option value="7">Lớp 7 (Vương quốc Đại Dương)</option>
+            <option value="8">Lớp 8 (Vương quốc Công Nghệ)</option>
+            <option value="9">Lớp 9 (Vương quốc Vũ Trụ)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Dạng câu hỏi:</label>
+          <select id="new-q-type" class="form-control">
+            <option value="MCQ">MCQ - Trắc nghiệm 1 đáp án</option>
+            <option value="NUM">NUM - Điền số / Bàn phím toán</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Đề bài (Hỗ trợ công thức toán KaTeX ví dụ $(x+2)^2$):</label>
+          <textarea id="new-q-stem" class="form-control" rows="3" placeholder="Nhập đề bài toán học..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Đáp án đúng:</label>
+          <input type="text" id="new-q-correct" class="form-control" placeholder="Đáp án đúng (ví dụ: $x^2+4x+4$ hoặc 12)" />
+        </div>
+
+        <div class="form-group">
+          <label>Đáp án nhiễu (kèm lỗi học sinh hay mắc):</label>
+          <input type="text" id="new-q-wrong1" class="form-control" placeholder="Đáp án sai (ví dụ: $x^2+4$ - thiếu 2ab)" />
+        </div>
+
+        <button class="btn btn-primary" onclick="app.saveNewQuestion()">
+          Lưu Câu Hỏi Vào Hệ Thống
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  saveNewQuestion() {
+    const grade = parseInt(document.getElementById('new-q-grade').value);
+    const type = document.getElementById('new-q-type').value;
+    const stem = document.getElementById('new-q-stem').value.trim();
+    const correct = document.getElementById('new-q-correct').value.trim();
+    const wrong1 = document.getElementById('new-q-wrong1').value.trim();
+
+    if (!stem || !correct) {
+      alert("Vui lòng nhập đề bài và đáp án đúng!");
+      return;
+    }
+
+    const newQ = {
+      id: 'q_custom_' + Date.now(),
+      grade: grade,
+      level: 1,
+      type: type,
+      stem: stem,
+      options: type === 'MCQ' ? [
+        { text: correct, correct: true },
+        { text: wrong1 || 'Không đúng', error_code: 'general_error', explain: 'Đáp án chưa chính xác.' },
+        { text: '0', error_code: 'zero_error' },
+        { text: '1', error_code: 'one_error' }
+      ] : undefined,
+      correct_num: type === 'NUM' ? correct : undefined,
+      solution_steps: ["Áp dụng đúng định nghĩa và công thức toán học."],
+      time_limit_sec: 35
+    };
+
+    this.questions.push(newQ);
+    this.saveStorage();
+    alert("Đã thêm câu hỏi thành công!");
+    this.closeModal();
+    this.switchAdminTab('questions');
+  }
+
+  exportDataJson() {
+    const data = {
+      students: this.students,
+      activities: this.activities,
+      questions: this.questions,
+      exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hanh-trinh-toan-hoc-backup-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  bindGlobalEvents() {
+    // Đóng modal khi bấm ra ngoài nền
+    const modal = document.getElementById('app-modal');
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) this.closeModal();
+      };
+    }
+  }
+}
+
+// Khởi chạy ứng dụng
+window.addEventListener('DOMContentLoaded', () => {
+  window.app = new MathApp();
+  window.app.init();
+});
+
   </script>
 </body>
 </html>
