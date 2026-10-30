@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Hành trình Toán học – Game Toán THCS Lớp 6–9</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Toán THCS">
+
+  <!-- KaTeX CSS & JS for beautiful math formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app-root">
+    <!-- Thanh tiêu đề ứng dụng (Header) -->
+    <header id="app-header" class="app-header"></header>
+
+    <!-- Khu vực nội dung chính hiển thị các màn hình (Main Views) -->
+    <main id="main-content" style="flex: 1;"></main>
+
+    <!-- Thanh điều hướng dưới cùng cho điện thoại (Bottom Nav) -->
+    <nav id="bottom-nav" class="bottom-nav"></nav>
+
+    <!-- Modal chung hiển thị chi tiết bài học, Boss, giải thích, thêm câu hỏi -->
+    <div id="app-modal" class="modal-overlay">
+      <div id="modal-content-area" class="modal-card"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/mathKeypad.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Service Worker Registration for PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('ServiceWorker registration skipped or unsupported in this mode:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
