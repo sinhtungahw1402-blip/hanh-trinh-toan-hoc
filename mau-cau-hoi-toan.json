@@ -1,0 +1,105 @@
+[
+  {
+    "_huong_dan": "DẠNG 1: MCQ - Trắc nghiệm 1 đáp án. Mỗi đáp án sai nên kèm 'explain' (lời giải thích lỗi khi học sinh chọn trúng)",
+    "id": "q_mau_l6_mcq",
+    "grade": 6,
+    "lesson_id": "L6-C1-B1",
+    "level": 1,
+    "type": "MCQ",
+    "stem": "Cho tập hợp $A = \\{2; 3; 5; 7\\}$. Khẳng định nào sau đây là **đúng**?",
+    "options": [
+      { "text": "$5 \\in A$", "correct": true },
+      { "text": "$4 \\in A$", "error_code": "not_in_set", "explain": "Số 4 không nằm trong danh sách phần tử của tập A." },
+      { "text": "$7 \\notin A$", "error_code": "wrong_symbol", "explain": "Kí hiệu không thuộc là sai vì 7 có mặt trong tập A." },
+      { "text": "$2 \\subset A$", "error_code": "element_vs_subset", "explain": "2 là phần tử nên phải dùng kí hiệu thuộc \\in, không dùng kí hiệu tập con \\subset." }
+    ],
+    "solution_steps": [
+      "Tập hợp A gồm các số nguyên tố nhỏ hơn 10: 2, 3, 5, 7.",
+      "Số 5 là một phần tử thuộc A nên $5 \\in A$."
+    ],
+    "hints": ["Kiểm tra xem số nào có mặt trong dấu ngoặc nhọn của A."],
+    "time_limit_sec": 30
+  },
+  {
+    "_huong_dan": "DẠNG 2: NUM - Điền số hoặc biểu thức. Học sinh dùng bàn phím số/toán để nhập đáp số.",
+    "id": "q_mau_l6_num",
+    "grade": 6,
+    "lesson_id": "L6-C1-B6",
+    "level": 1,
+    "type": "NUM",
+    "stem": "Tính giá trị của lũy thừa $2^4$:",
+    "correct_num": "16",
+    "solution_steps": [
+      "$2^4 = 2 \\times 2 \\times 2 \\times 2 = 16$."
+    ],
+    "hints": ["$2^4$ là tích của 4 thừa số 2 nhân với nhau."],
+    "time_limit_sec": 30
+  },
+  {
+    "_huong_dan": "DẠNG 3: ERR - Thám tử lỗi sai. Học sinh chạm vào dòng bị sai trong các bước giải.",
+    "id": "q_mau_l8_err",
+    "grade": 8,
+    "lesson_id": "L8-C2-B6",
+    "level": 3,
+    "type": "ERR",
+    "stem": "Thám tử lỗi sai: Tìm bước bị biến đổi sai trong bài khai triển $(x - 4)^2$ của bạn Hoa:",
+    "steps": [
+      { "num": 1, "text": "Dòng 1: Áp dụng $(a - b)^2 = a^2 - 2ab + b^2$" },
+      { "num": 2, "text": "Dòng 2: Thay số: $x^2 - 2 \\times x \\times 4 - 4^2$" },
+      { "num": 3, "text": "Dòng 3: Tính ra: $x^2 - 8x - 16$" }
+    ],
+    "wrong_step_num": 2,
+    "explain": "Dòng 2 sai ở dấu của số hạng cuối cùng: theo công thức là $+ b^2$, tức là $+ 4^2 = +16$, không phải $- 4^2$.",
+    "solution_steps": [
+      "Công thức hằng đẳng thức: $(a - b)^2 = a^2 - 2ab + b^2$.",
+      "Khai triển đúng: $(x - 4)^2 = x^2 - 2 \\cdot x \\cdot 4 + 4^2 = x^2 - 8x + 16$."
+    ],
+    "hints": ["Số hạng cuối cùng của bình phương một hiệu luôn luôn mang dấu cộng."],
+    "time_limit_sec": 45
+  },
+  {
+    "_huong_dan": "DẠNG 4: ORDER - Sắp xếp các bước giải. Học sinh dùng nút mũi tên hoặc kéo thả để xếp đúng thứ tự.",
+    "id": "q_mau_l7_order",
+    "grade": 7,
+    "lesson_id": "L7-C1-B4",
+    "level": 2,
+    "type": "ORDER",
+    "stem": "Sắp xếp 4 bước sau để tìm x trong phương trình: $x + \\frac{1}{3} = \\frac{5}{6}$",
+    "items": [
+      { "id": "s1", "text": "Áp dụng quy tắc chuyển vế: $x = \\frac{5}{6} - \\frac{1}{3}$" },
+      { "id": "s2", "text": "Quy đồng mẫu số chung là 6: $x = \\frac{5}{6} - \\frac{2}{6}$" },
+      { "id": "s3", "text": "Thực hiện phép trừ tử số: $x = \\frac{3}{6}$" },
+      { "id": "s4", "text": "Rút gọn phân số tối giản: $x = \\frac{1}{2}$" }
+    ],
+    "correct_order": ["s1", "s2", "s3", "s4"],
+    "solution_steps": [
+      "Bước 1: Chuyển vế đổi dấu số hạng tự do.",
+      "Bước 2: Quy đồng hai phân số về cùng mẫu số.",
+      "Bước 3: Trừ các tử số.",
+      "Bước 4: Rút gọn phân số về tối giản."
+    ],
+    "hints": ["Bắt đầu bằng việc chuyển phân số ở vế trái sang vế phải."],
+    "time_limit_sec": 45
+  },
+  {
+    "_huong_dan": "DẠNG 5: MCQ Toán Vận dụng cao / Lớp 9",
+    "id": "q_mau_l9_mcq",
+    "grade": 9,
+    "lesson_id": "L9-C1-B2",
+    "level": 2,
+    "type": "MCQ",
+    "stem": "Nghiệm của hệ phương trình $\\begin{cases} x + y = 5 \\\\ 2x - y = 4 \\end{cases}$ là:",
+    "options": [
+      { "text": "$(3; 2)$", "correct": true },
+      { "text": "$(2; 3)$", "error_code": "swap_xy", "explain": "Thử lại: $2(2) - 3 = 1 \\ne 4$. Bạn đã nhầm thứ tự giữa x và y." },
+      { "text": "$(4; 1)$", "error_code": "only_one_eq", "explain": "Cặp (4; 1) chỉ thỏa mãn phương trình đầu tiên, nhưng không thỏa phương trình thứ hai." },
+      { "text": "$(5; 0)$", "error_code": "wrong_pair", "explain": "Cặp số không thỏa mãn hệ phương trình." }
+    ],
+    "solution_steps": [
+      "Cộng hai phương trình vế với vế: $3x = 9 \\Rightarrow x = 3$.",
+      "Thay $x = 3$ vào $x + y = 5 \\Rightarrow y = 2$."
+    ],
+    "hints": ["Cộng từng vế của 2 phương trình để khử ẩn y."],
+    "time_limit_sec": 40
+  }
+]

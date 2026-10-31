@@ -3417,9 +3417,10 @@ class MathApp {
             <h2 style="font-size: 22px; font-weight: 800; color: #fff;">📊 TRUNG TÂM QUẢN TRỊ VIÊN</h2>
             <p style="font-size: 13px; color: var(--text-muted);">Theo dõi hoạt động thời gian thực của học sinh và quản lý nội dung</p>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Câu Hỏi Mới</button>
-            <button class="btn btn-secondary btn-sm" onclick="app.exportDataJson()">📥 Xuất Dữ Liệu</button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-success btn-sm" onclick="app.openImportModal()">📥 Nhập File Đề (CSV / JSON)</button>
+            <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Thủ Công</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.exportDataJson()">💾 Xuất Dữ Liệu</button>
           </div>
         </div>
 
@@ -3666,10 +3667,50 @@ class MathApp {
   renderAdminQuestionsTab() {
     return `
       <div class="table-card">
-        <div style="padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <h3 style="font-size: 15px; font-weight: 700;">Kho câu hỏi có sẵn (Xem trước KaTeX):</h3>
-          <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Câu Hỏi</button>
+        <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 16px; font-weight: 800;">📚 Kho câu hỏi hệ thống (<span id="q-total-count">${this.questions.length}</span> câu):</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Xem trước KaTeX, nhập đề hàng loạt bằng file mẫu hoặc thêm thủ công</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-success btn-sm" onclick="app.openImportModal()">📥 Nhập File Đề (CSV / JSON)</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.downloadCsvTemplate()">📄 Tải File Excel Mẫu</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.downloadJsonTemplate()">📋 Tải File JSON Mẫu</button>
+              <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Thủ Công</button>
+            </div>
+          </div>
+
+          <!-- Bộ lọc câu hỏi -->
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: var(--radius-md);">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Khối lớp:</label>
+              <select id="filter-q-grade" class="form-control" style="padding: 4px 8px; font-size: 13px;" onchange="app.filterQuestionsList()">
+                <option value="all">Tất cả các khối</option>
+                <option value="6">Khối Lớp 6</option>
+                <option value="7">Khối Lớp 7</option>
+                <option value="8">Khối Lớp 8</option>
+                <option value="9">Khối Lớp 9</option>
+              </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Dạng câu:</label>
+              <select id="filter-q-type" class="form-control" style="padding: 4px 8px; font-size: 13px;" onchange="app.filterQuestionsList()">
+                <option value="all">Tất cả các dạng</option>
+                <option value="MCQ">MCQ - Trắc nghiệm</option>
+                <option value="NUM">NUM - Điền số</option>
+                <option value="ERR">ERR - Thám tử lỗi sai</option>
+                <option value="ORDER">ORDER - Sắp xếp</option>
+              </select>
+            </div>
+
+            <div style="flex: 1; min-width: 180px;">
+              <input type="text" id="filter-q-search" class="form-control" placeholder="Tìm theo nội dung đề bài..." style="padding: 4px 10px; font-size: 13px;" oninput="app.filterQuestionsList()" />
+            </div>
+          </div>
         </div>
+
         <div class="table-responsive">
           <table class="data-table">
             <thead>
@@ -3677,31 +3718,468 @@ class MathApp {
                 <th>Mã ID</th>
                 <th>Khối</th>
                 <th>Dạng</th>
-                <th>Cấp Độ</th>
+                <th>Cấp</th>
                 <th>Nội Dung Câu Hỏi (KaTeX)</th>
                 <th>Thao Tác</th>
               </tr>
             </thead>
-            <tbody>
-              ${this.questions.map(q => `
-                <tr>
-                  <td style="color: var(--text-muted); font-size: 11px;">${q.id}</td>
-                  <td>Lớp ${q.grade}</td>
-                  <td><span class="tag-badge" style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe;">${q.type}</span></td>
-                  <td>Cấp ${q.level}</td>
-                  <td style="max-width: 400px;">
-                    <div>${q.stem}</div>
-                  </td>
-                  <td>
-                    <button class="btn btn-secondary btn-sm" onclick="app.previewQuestion('${q.id}')">Xem Thử</button>
-                  </td>
-                </tr>
-              `).join('')}
+            <tbody id="questions-table-body">
+              ${this.renderQuestionsTableRows(this.questions)}
             </tbody>
           </table>
         </div>
       </div>
     `;
+  }
+
+  renderQuestionsTableRows(list) {
+    if (!list || list.length === 0) {
+      return `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">Không tìm thấy câu hỏi phù hợp với bộ lọc.</td></tr>`;
+    }
+    return list.map(q => `
+      <tr>
+        <td style="color: var(--text-muted); font-size: 11px;">${q.id}</td>
+        <td><strong>Lớp ${q.grade}</strong></td>
+        <td><span class="tag-badge" style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe;">${q.type}</span></td>
+        <td>Cấp ${q.level || 1}</td>
+        <td style="max-width: 420px; line-height: 1.4;">
+          <div class="math-target">${q.stem}</div>
+        </td>
+        <td>
+          <div style="display: flex; gap: 4px;">
+            <button class="btn btn-secondary btn-sm" onclick="app.previewQuestion('${q.id}')">Xem Thử</button>
+            <button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="app.deleteQuestion('${q.id}')">Xóa</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  filterQuestionsList() {
+    const gradeVal = document.getElementById('filter-q-grade')?.value || 'all';
+    const typeVal = document.getElementById('filter-q-type')?.value || 'all';
+    const searchVal = (document.getElementById('filter-q-search')?.value || '').toLowerCase().trim();
+
+    const filtered = this.questions.filter(q => {
+      const matchGrade = gradeVal === 'all' || String(q.grade) === gradeVal;
+      const matchType = typeVal === 'all' || q.type === typeVal;
+      const matchSearch = !searchVal || (q.stem && q.stem.toLowerCase().includes(searchVal));
+      return matchGrade && matchType && matchSearch;
+    });
+
+    const tbody = document.getElementById('questions-table-body');
+    if (tbody) {
+      tbody.innerHTML = this.renderQuestionsTableRows(filtered);
+      this.renderMath(tbody);
+    }
+    const countSpan = document.getElementById('q-total-count');
+    if (countSpan) countSpan.textContent = filtered.length;
+  }
+
+  deleteQuestion(id) {
+    if (confirm("Bạn có chắc chắn muốn xóa câu hỏi này khỏi ngân hàng đề?")) {
+      this.questions = this.questions.filter(q => q.id !== id);
+      this.saveStorage();
+      this.filterQuestionsList();
+      window.soundFX?.playClick();
+    }
+  }
+
+  previewQuestion(id) {
+    const q = this.questions.find(item => item.id === id);
+    if (!q) return;
+
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    let optionsHtml = '';
+    if (q.type === 'MCQ' && q.options) {
+      optionsHtml = `
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+          <h5 style="font-size: 13px; color: #a5b4fc; font-weight: 700;">Các phương án lựa chọn:</h5>
+          ${q.options.map((opt, i) => `
+            <div style="background: ${opt.correct ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.03)'}; 
+                        border: 1px solid ${opt.correct ? '#10b981' : 'var(--border)'}; 
+                        padding: 10px 14px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>${['A', 'B', 'C', 'D'][i]}.</strong> <span class="math-target">${opt.text}</span>
+                ${opt.explain ? `<div style="font-size: 11px; color: #fca5a5; margin-top: 4px;">⚠️ Lỗi tư duy: ${opt.explain}</div>` : ''}
+              </div>
+              ${opt.correct ? '<span style="color: #34d399; font-weight: 800; font-size: 12px;">✓ ĐÚNG</span>' : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (q.type === 'NUM') {
+      optionsHtml = `
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 12px; border-radius: var(--radius-md); margin-top: 10px;">
+          <strong style="color: #34d399;">Đáp số chuẩn:</strong> <span class="math-target" style="font-size: 16px; font-weight: 700;">${q.correct_num}</span>
+        </div>
+      `;
+    } else if (q.type === 'ERR' && q.steps) {
+      optionsHtml = `
+        <div style="margin-top: 10px;">
+          <h5 style="font-size: 13px; color: #a5b4fc; font-weight: 700;">Các bước giải:</h5>
+          ${q.steps.map(s => `
+            <div style="padding: 6px 10px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); margin-top: 4px; border-left: 3px solid ${s.num === q.wrong_step_num ? '#ef4444' : '#10b981'};">
+              <strong>${s.num === q.wrong_step_num ? '❌ BƯỚC SAI:' : '✓'}</strong> <span class="math-target">${s.text}</span>
+            </div>
+          `).join('')}
+          ${q.explain ? `<div style="margin-top: 8px; color: #fca5a5; font-size: 12px;">💡 Giải thích lỗi: ${q.explain}</div>` : ''}
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>Chi Tiết Câu Hỏi (ID: ${q.id})</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Khối Lớp ${q.grade} • Cấp Độ ${q.level || 1} • Dạng ${q.type}</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px;">
+          <h4 style="font-size: 16px; font-weight: 700; color: #f8fafc;" class="math-target">${q.stem}</h4>
+        </div>
+
+        ${optionsHtml}
+
+        <div style="background: rgba(255,255,255,0.02); border-radius: var(--radius-md); padding: 12px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="font-size: 12px; color: #38bdf8; font-weight: 700; margin-bottom: 4px;">📝 Hướng dẫn giải chi tiết:</div>
+          ${(q.solution_steps || ['Áp dụng đúng định lý toán học.']).map(s => `<div style="font-size: 13px; color: #cbd5e1; margin-bottom: 4px;">• <span class="math-target">${s}</span></div>`).join('')}
+        </div>
+
+        <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="app.closeModal()">Đóng Xem Thử</button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+    this.renderMath(modalBody);
+  }
+
+  downloadCsvTemplate() {
+    const csvContent = `\uFEFFKhoi,Ma_Bai,Cap_Do,Dang_Cau,De_Bai,Dap_An_Dung,Dap_An_Nhieu_1,Giai_Thich_Loi_1,Dap_An_Nhieu_2,Giai_Thich_Loi_2,Dap_An_Nhieu_3,Giai_Thich_Loi_3,Loi_Giai_Chi_Tiet,Goi_Y,Thoi_Gian_Giay
+6,L6-C1-B1,1,MCQ,"Cho tập hợp $A = \\{2; 3; 5; 7\\}$. Khẳng định nào sau đây là đúng?","$5 \\in A$","$4 \\in A$","Số 4 không thuộc tập hợp A","$7 \\notin A$","Kí hiệu không thuộc là sai vì 7 có trong A","$2 \\subset A$","Số 2 là phần tử nên phải dùng kí hiệu thuộc \\in","Tập A gồm 4 phần tử: 2; 3; 5; 7. Số 5 thuộc tập A.","Kiểm tra từng phần tử trong dấu ngoặc nhọn",30
+6,L6-C1-B6,1,NUM,"Tính giá trị của lũy thừa $2^4$:","16","","","","","","","$2^4 = 2 \\times 2 \\times 2 \\times 2 = 16$","$2^4$ là tích của 4 thừa số 2",30
+6,L6-C3-B16,2,MCQ,"Tính kết quả phép nhân: $(-4) \\times (-5)$","$20$","$-20$","Nhân hai số cùng dấu âm luôn ra kết quả DƯƠNG","$-9$","Bạn đang cộng (-4)+(-5) thay vì nhân","$9$","Tính toán sai phép nhân","Quy tắc: $(-a) \\times (-b) = a \\times b$. Do đó $(-4) \\times (-5) = 20$.","Nhớ quy tắc: Âm nhân âm thành dương",25
+6,L6-C6-B26,2,MCQ,"Tính kết quả phép cộng: $\\frac{1}{2} + \\frac{1}{3}$","$\\frac{5}{6}$","$\\frac{2}{5}$","Phải quy đồng mẫu số chung trước khi cộng tử! Không được cộng tử với tử mẫu với mẫu.","$\\frac{1}{5}$","Không trừ hay cộng trực tiếp mẫu số","$\\frac{5}{5} = 1$","Mẫu số chung nhỏ nhất của 2 và 3 là 6","Mẫu chung là 6. Quy đồng: 3/6 + 2/6 = 5/6.","Quy đồng về mẫu chung là 6",40
+7,L7-C1-B2,1,NUM,"Tính giá trị biểu thức: $(-\\frac{3}{5}) + \\frac{8}{5}$ (nhập số nguyên):","1","","","","","","","Cùng mẫu 5: (-3 + 8)/5 = 5/5 = 1.","Hai phân số cùng mẫu số 5",30
+7,L7-C2-B6,2,MCQ,"Căn bậc hai số học của $49$ là số nào?","$7$","$\\pm 7$","Căn bậc hai số học của số không âm luôn là số KHÔNG ÂM (dương)","$-7$","Căn bậc hai số học không thể là số âm","$2401$","Bạn đang tính bình phương 49^2 thay vì lấy căn","Theo định nghĩa: Căn bậc hai số học của a >= 0 là số x >= 0 sao cho x^2 = a.","Căn bậc hai số học luôn không âm",30
+8,L8-C2-B6,2,MCQ,"Khai triển hằng đẳng thức $(x + 3)^2$ ta được:","$x^2 + 6x + 9$","$x^2 + 9$","Còn thiếu số hạng hai lần tích 2ab trong (a+b)^2","$x^2 + 3x + 9$","Sai hệ số hạng tử chéo 2ab = 2*x*3 = 6x","$x^2 + 6x + 3$","Số hạng cuối là b^2 = 3^2 = 9 chứ không phải 3","Áp dụng (a+b)^2 = a^2 + 2ab + b^2. Ta có x^2 + 6x + 9.","Nhớ hằng đẳng thức bình phương của một tổng",35
+8,L8-C4-B35,2,NUM,"Tam giác vuông có hai cạnh góc vuông là $6\\text{ cm}$ và $8\\text{ cm}$. Độ dài cạnh huyền là bao nhiêu cm?","10","","","","","","","Theo định lí Pythagore: c^2 = 6^2 + 8^2 = 100 => c = 10 cm.","Áp dụng định lí Pythagore: c^2 = a^2 + b^2",35
+9,L9-C1-B2,2,MCQ,"Cặp số $(x; y)$ nào là nghiệm của hệ $\\begin{cases} x + y = 5 \\\\ 2x - y = 4 \\end{cases}$?","$(3; 2)$","$(2; 3)$","Bạn đã đảo ngược thứ tự của x và y","$(4; 1)$","Chỉ thỏa mãn phương trình 1 nhưng không thỏa mãn phương trình 2","$(5; 0)$","Cặp (5; 0) không thỏa mãn phương trình 2","Cộng hai vế ta được 3x = 9 => x = 3. Thay vào tìm được y = 2. Nghiệm là (3; 2).","Cộng 2 phương trình để triệt tiêu ẩn y",45
+9,L9-C6-B19,2,NUM,"Tính biệt thức $\\Delta = b^2 - 4ac$ của phương trình: $x^2 - 6x + 5 = 0$:","16","","","","","","","Ta có a = 1, b = -6, c = 5. Delta = (-6)^2 - 4*1*5 = 36 - 20 = 16.","Hệ số b = -6, chú ý (-6)^2 = 36",35`;
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mau-cau-hoi-toan.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  downloadJsonTemplate() {
+    const jsonSample = QUESTION_BANK.slice(0, 5);
+    const blob = new Blob([JSON.stringify(jsonSample, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mau-cau-hoi-toan.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  openImportModal() {
+    window.soundFX?.playClick();
+    this.tempImportedQuestions = [];
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>📥 NHẬP NGÂN HÀNG CÂU HỎI THEO MẪU</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Hỗ trợ file Excel/CSV (.csv) hoặc file JSON chuẩn</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Khu vực tải file mẫu -->
+        <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-md); padding: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #c7d2fe;">Chưa có file mẫu?</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Tải file mẫu có sẵn hướng dẫn và câu hỏi mẫu về máy</div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" onclick="app.downloadCsvTemplate()">📄 Tải File Excel Mẫu</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.downloadJsonTemplate()">📋 Tải File JSON Mẫu</button>
+          </div>
+        </div>
+
+        <!-- Cách 1: Chọn file từ máy tính -->
+        <div class="form-group" style="margin-top: 6px;">
+          <label><strong>Cách 1: Chọn file từ thiết bị (.csv, .json, .txt):</strong></label>
+          <input type="file" id="import-file-input" accept=".csv,.json,.txt" class="form-control" onchange="app.handleImportFile(event)" />
+        </div>
+
+        <!-- Cách 2: Dán nội dung trực tiếp -->
+        <div class="form-group">
+          <label><strong>Cách 2: Hoặc dán trực tiếp nội dung CSV / JSON vào đây:</strong></label>
+          <textarea id="import-text-paste" class="form-control" rows="5" placeholder="Dán toàn bộ nội dung file CSV hoặc JSON vào đây..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="app.previewImportData()">
+          🔍 Phân Tích & Kiểm Tra Dữ Liệu
+        </button>
+
+        <!-- Khung xem trước kết quả phân tích -->
+        <div id="import-preview-box" style="display: none; margin-top: 8px;"></div>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  handleImportFile(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const pasteArea = document.getElementById('import-text-paste');
+      if (pasteArea) pasteArea.value = text;
+      this.previewImportData();
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentVal = '';
+    let inQuotes = false;
+    const str = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const nextChar = str[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          currentVal += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        currentRow.push(currentVal.trim());
+        currentVal = '';
+      } else if (char === '\n' && !inQuotes) {
+        currentRow.push(currentVal.trim());
+        if (currentRow.some(c => c.length > 0)) {
+          rows.push(currentRow);
+        }
+        currentRow = [];
+        currentVal = '';
+      } else {
+        currentVal += char;
+      }
+    }
+    if (currentVal || currentRow.length > 0) {
+      currentRow.push(currentVal.trim());
+      if (currentRow.some(c => c.length > 0)) {
+        rows.push(currentRow);
+      }
+    }
+    return rows;
+  }
+
+  parseImportData(rawText) {
+    const cleanText = rawText.trim();
+    if (!cleanText) return [];
+
+    // Thử parse dạng JSON trước
+    if (cleanText.startsWith('[') || cleanText.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(cleanText);
+        const list = Array.isArray(parsed) ? parsed : (parsed.questions || []);
+        return list.filter(q => q && q.stem).map((q, idx) => ({
+          ...q,
+          id: q.id || `q_imp_${Date.now()}_${idx}`,
+          grade: parseInt(q.grade) || 6,
+          level: parseInt(q.level) || 1,
+          type: q.type || 'MCQ',
+          time_limit_sec: q.time_limit_sec || 35
+        }));
+      } catch (e) {
+        console.warn("JSON parse failed, trying CSV...", e);
+      }
+    }
+
+    // Parse dạng CSV
+    const rows = this.parseCSV(cleanText);
+    if (rows.length < 2) return [];
+
+    const headers = rows[0].map(h => h.toLowerCase().trim().replace(/_/g, ''));
+    const colIndex = (keys) => headers.findIndex(h => keys.some(k => h.includes(k)));
+
+    const colKhoi = colIndex(['khoi', 'grade', 'lop']);
+    const colMaBai = colIndex(['mabai', 'lesson']);
+    const colCapDo = colIndex(['capdo', 'level']);
+    const colDang = colIndex(['dang', 'type']);
+    const colDebai = colIndex(['debai', 'stem', 'cauhoi', 'noidung']);
+    const colDung = colIndex(['dapdung', 'correct', 'dapan']);
+    const colNhieu1 = colIndex(['nhieu1', 'wrong1', 'sainhieu1']);
+    const colLoi1 = colIndex(['loi1', 'explain1']);
+    const colNhieu2 = colIndex(['nhieu2', 'wrong2']);
+    const colLoi2 = colIndex(['loi2', 'explain2']);
+    const colNhieu3 = colIndex(['nhieu3', 'wrong3']);
+    const colLoi3 = colIndex(['loi3', 'explain3']);
+    const colLoiGiai = colIndex(['loigiai', 'solution', 'huongdan']);
+    const colGoiy = colIndex(['goiy', 'hint']);
+    const colThoigian = colIndex(['thoigian', 'time']);
+
+    const questions = [];
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      const stem = colDebai >= 0 ? row[colDebai] : '';
+      if (!stem) continue;
+
+      const grade = colKhoi >= 0 ? (parseInt(row[colKhoi]) || 6) : 6;
+      const lesson_id = colMaBai >= 0 && row[colMaBai] ? row[colMaBai] : `L${grade}-C1-B1`;
+      const level = colCapDo >= 0 ? (parseInt(row[colCapDo]) || 1) : 1;
+      const type = colDang >= 0 && row[colDang] ? row[colDang].toUpperCase() : 'MCQ';
+      const dung = colDung >= 0 ? row[colDung] : '';
+
+      let options = undefined;
+      let correct_num = undefined;
+
+      if (type === 'MCQ') {
+        options = [{ text: dung || 'Đúng', correct: true }];
+        if (colNhieu1 >= 0 && row[colNhieu1]) {
+          options.push({ text: row[colNhieu1], error_code: 'error_1', explain: colLoi1 >= 0 ? row[colLoi1] : undefined });
+        }
+        if (colNhieu2 >= 0 && row[colNhieu2]) {
+          options.push({ text: row[colNhieu2], error_code: 'error_2', explain: colLoi2 >= 0 ? row[colLoi2] : undefined });
+        }
+        if (colNhieu3 >= 0 && row[colNhieu3]) {
+          options.push({ text: row[colNhieu3], error_code: 'error_3', explain: colLoi3 >= 0 ? row[colLoi3] : undefined });
+        }
+        while (options.length < 4) {
+          options.push({ text: `Phương án khác ${options.length}`, error_code: `error_${options.length}` });
+        }
+      } else if (type === 'NUM') {
+        correct_num = dung;
+      }
+
+      const solText = colLoiGiai >= 0 ? row[colLoiGiai] : '';
+      const solution_steps = solText ? solText.split('|').map(s => s.trim()) : ["Áp dụng đúng định lý và công thức toán học."];
+
+      const hintText = colGoiy >= 0 ? row[colGoiy] : '';
+      const hints = hintText ? hintText.split('|').map(h => h.trim()) : [];
+
+      const time_limit_sec = colThoigian >= 0 ? (parseInt(row[colThoigian]) || 35) : 35;
+
+      questions.push({
+        id: `q_imp_${Date.now()}_${r}`,
+        grade,
+        lesson_id,
+        level,
+        type,
+        stem,
+        options,
+        correct_num,
+        solution_steps,
+        hints,
+        time_limit_sec
+      });
+    }
+
+    return questions;
+  }
+
+  previewImportData() {
+    const rawText = document.getElementById('import-text-paste')?.value || '';
+    const parsed = this.parseImportData(rawText);
+    const box = document.getElementById('import-preview-box');
+    if (!box) return;
+
+    if (!parsed || parsed.length === 0) {
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 12px; color: #fca5a5; font-size: 13px;">
+          ⚠️ Không tìm thấy câu hỏi hợp lệ! Vui lòng kiểm tra lại định dạng file hoặc tải file mẫu để xem ví dụ.
+        </div>
+      `;
+      return;
+    }
+
+    this.tempImportedQuestions = parsed;
+
+    const k6 = parsed.filter(q => q.grade === 6).length;
+    const k7 = parsed.filter(q => q.grade === 7).length;
+    const k8 = parsed.filter(q => q.grade === 8).length;
+    const k9 = parsed.filter(q => q.grade === 9).length;
+
+    box.style.display = 'block';
+    box.innerHTML = `
+      <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: var(--radius-md); padding: 14px;">
+        <div style="font-weight: 800; color: #34d399; font-size: 14px;">
+          🎉 Đã phân tích thành công ${parsed.length} câu hỏi hợp lệ!
+        </div>
+        <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px;">
+          Lớp 6: <strong>${k6}</strong> • Lớp 7: <strong>${k7}</strong> • Lớp 8: <strong>${k8}</strong> • Lớp 9: <strong>${k9}</strong> câu
+        </div>
+
+        <div style="margin-top: 10px; font-size: 12px; font-weight: 700; color: #a5b4fc;">Xem trước 3 câu đầu tiên:</div>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px; max-height: 160px; overflow-y: auto;">
+          ${parsed.slice(0, 3).map((q, i) => `
+            <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 12px;">
+              <strong>Câu ${i + 1} (Lớp ${q.grade} • ${q.type}):</strong> <span class="math-target">${q.stem}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="margin-top: 12px; font-size: 13px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc;">
+            <input type="radio" name="import-mode" value="append" checked />
+            <span>Gộp thêm vào ngân hàng câu hỏi hiện có (${this.questions.length} câu)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #fca5a5; margin-top: 4px;">
+            <input type="radio" name="import-mode" value="replace" />
+            <span>Xóa ngân hàng câu hỏi cũ và thay thế toàn bộ bằng file này</span>
+          </label>
+        </div>
+
+        <button class="btn btn-success" style="width: 100%; margin-top: 12px; font-size: 15px; padding: 12px;" onclick="app.confirmImportQuestions()">
+          ✓ Xác Nhận Nạp ${parsed.length} Câu Hỏi Vào Hệ Thống
+        </button>
+      </div>
+    `;
+
+    this.renderMath(box);
+  }
+
+  confirmImportQuestions() {
+    if (!this.tempImportedQuestions || this.tempImportedQuestions.length === 0) return;
+
+    const mode = document.querySelector('input[name="import-mode"]:checked')?.value || 'append';
+    const count = this.tempImportedQuestions.length;
+
+    if (mode === 'replace') {
+      this.questions = [...this.tempImportedQuestions];
+    } else {
+      this.questions = [...this.questions, ...this.tempImportedQuestions];
+    }
+
+    this.saveStorage();
+    window.soundFX?.playVictory();
+    alert(`🎉 Đã nạp thành công ${count} câu hỏi vào hệ thống! Hiện có tổng cộng ${this.questions.length} câu.`);
+    this.closeModal();
+    this.switchAdminTab('questions');
   }
 
   // Xem chi tiết học sinh
