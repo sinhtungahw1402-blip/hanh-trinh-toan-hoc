@@ -32,19 +32,26 @@
 
 ---
 
-### 2. Dành cho Quản trị viên (Admin Portal)
+### 2. Dành cho Quản trị viên (Admin Portal & Phân Quyền Thiết Bị)
+- **Cơ chế khóa thiết bị Admin (Chỉ máy của bạn là Admin):**
+  - Khi cài đặt trên máy của học sinh, ứng dụng tự động khóa chế độ Admin. Học sinh chỉ có thể Đăng ký / Đăng nhập tài khoản học sinh.
+  - Chỉ trên máy tính của bạn (sau khi nhập mã bảo mật `admin123456` và chọn *Ghi nhớ thiết bị Admin*), máy mới được cấp quyền Quản trị viên vĩnh viễn.
+  - Có thể đổi mã bảo mật Quản trị viên bất kỳ lúc nào.
+- **Quản lý tài khoản & Mật khẩu học sinh:**
+  - Mỗi học sinh tự tạo tài khoản với tên đăng nhập và **mật khẩu riêng**.
+  - Học sinh có thể tự đổi mật khẩu trong tab **Tôi**.
+  - Admin xem được danh sách tài khoản và có nút **🔑 Cấp lại mật khẩu** nếu học sinh quên.
+- **Xuất file báo cáo tổng hợp (Excel / CSV):**
+  - Nút **📊 Xuất Báo Cáo Tổng Hợp (Excel/CSV)** tạo ngay file bảng tính chi tiết: Họ tên, Username, Mật khẩu, Trường lớp, Cấp độ, Điểm XP, Tổng sao, Độ chính xác (%), Chuỗi ngày, Xếp loại học lực (Xuất sắc, Giỏi, Khá, Cần bồi dưỡng) và Nhận xét tổng quát.
+- **Đồng bộ tiến trình từ nhiều thiết bị:**
+  - Học sinh trên điện thoại bấm nút *Xuất tiến trình*, Quản trị viên chỉ cần bấm *Đồng bộ / Nạp dữ liệu* để cập nhật vào bảng theo dõi.
 - **Theo dõi thời gian thực (Live Activity Feed):**
   - Xem ngay lập tức học sinh nào vừa làm bài gì, điểm số, số sao, độ chính xác (%) và thời gian làm bài.
 - **Hồ sơ học sinh & Giám sát gian lận (Anti-Cheat):**
-  - Danh sách toàn bộ học sinh tham gia với cấp độ, tổng XP, chuỗi ngày và tỷ lệ chính xác.
-  - Tự động phát hiện và gắn cờ cảnh báo (Flag) những trường hợp bất thường (ví dụ: làm 10 câu trong 4 giây đạt 100%).
-  - Quyền Admin: Reset điểm về 0, khóa tài khoản vi phạm.
-- **Biểu đồ nhiệt lỗi sai (Error Heatmap):**
-  - Thống kê chi tiết những chỗ học sinh hay mắc lỗi nhất (ví dụ: *quên $2ab$ trong hằng đẳng thức*, *cộng phân số quên quy đồng*, *nhân số âm sai dấu*).
-- **Quản lý ngân hàng câu hỏi:**
-  - Xem trước hiển thị công thức toán học KaTeX.
-  - Biểu mẫu thêm câu hỏi mới trực tiếp với mã lỗi và lời giải chi tiết.
-- **Xuất dữ liệu dự phòng (JSON Export):** Lưu trữ toàn bộ dữ liệu học sinh, kết quả và câu hỏi chỉ với 1 click.
+  - Tự động gắn cờ cảnh báo (Flag) những trường hợp làm quá nhanh bất thường (ví dụ: 10 câu trong 4 giây đạt 100%).
+- **Quản lý ngân hàng câu hỏi & Nhập đề file mẫu:**
+  - Tải file mẫu Excel (.csv) hoặc JSON về máy để soạn bài.
+  - Nạp đề hàng loạt vào hệ thống với bộ kiểm tra lỗi tự động và xem trước KaTeX.
 
 ---
 

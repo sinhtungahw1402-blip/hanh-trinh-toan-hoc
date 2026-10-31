@@ -1699,11 +1699,15 @@ const QUESTION_BANK = [
   }
 ];
 
+// Khóa bảo mật Quản trị viên mặc định (Chỉ máy của Admin mới có quyền truy cập)
+const DEFAULT_ADMIN_KEY = "admin123456";
+
 // Danh sách học sinh mẫu ban đầu để Quản trị viên (Admin) thấy bảng theo dõi hoạt động sống động
 const INITIAL_STUDENTS = [
   {
     id: "hs_001",
     username: "minhanh_k6",
+    password: "123",
     name: "Nguyễn Minh Anh",
     nickname: "AnhSaoBang",
     grade: 6,
@@ -1723,6 +1727,7 @@ const INITIAL_STUDENTS = [
   {
     id: "hs_002",
     username: "quanghuy_k7",
+    password: "123",
     name: "Trần Quang Huy",
     nickname: "HuyHaiMa",
     grade: 7,
@@ -1742,6 +1747,7 @@ const INITIAL_STUDENTS = [
   {
     id: "hs_003",
     username: "baonam_k8",
+    password: "123",
     name: "Lê Bảo Nam",
     nickname: "NamCyber",
     grade: 8,
@@ -1761,6 +1767,7 @@ const INITIAL_STUDENTS = [
   {
     id: "hs_004",
     username: "khanhlinh_k9",
+    password: "123",
     name: "Phạm Khánh Linh",
     nickname: "LinhCosmos",
     grade: 9,
@@ -1780,6 +1787,7 @@ const INITIAL_STUDENTS = [
   {
     id: "hs_005",
     username: "ducthang_k6",
+    password: "123",
     name: "Vũ Đức Thắng",
     nickname: "ThangNinja",
     grade: 6,
@@ -1799,6 +1807,7 @@ const INITIAL_STUDENTS = [
   {
     id: "hs_006",
     username: "hoanglong_cheat",
+    password: "123",
     name: "Hoàng Phi Long",
     nickname: "LongSieuToc",
     grade: 8,
@@ -2245,11 +2254,20 @@ class MathApp {
   }
 
   initStorage() {
+    // Phân biệt thiết bị Quản trị viên (Chỉ máy của Admin mới có flag này)
+    this.isAdminDevice = localStorage.getItem('htth_is_admin_device') === 'true';
+    this.adminKey = localStorage.getItem('htth_admin_key') || (typeof DEFAULT_ADMIN_KEY !== 'undefined' ? DEFAULT_ADMIN_KEY : 'admin123456');
+
     // Tải hoặc khởi tạo danh sách học sinh
     if (!localStorage.getItem('htth_students')) {
       localStorage.setItem('htth_students', JSON.stringify(INITIAL_STUDENTS));
     }
     this.students = JSON.parse(localStorage.getItem('htth_students'));
+
+    // Đảm bảo mọi học sinh đều có mật khẩu riêng
+    this.students.forEach(st => {
+      if (!st.password) st.password = "123";
+    });
 
     // Tải hoặc khởi tạo lịch sử hoạt động
     if (!localStorage.getItem('htth_activities')) {
@@ -2263,10 +2281,10 @@ class MathApp {
     }
     this.questions = JSON.parse(localStorage.getItem('htth_questions'));
 
-    // Học sinh hiện tại đăng nhập (mặc định chọn học sinh đầu tiên)
+    // Học sinh hiện tại đăng nhập
     let savedStudentId = localStorage.getItem('htth_current_student_id');
     this.currentStudent = this.students.find(s => s.id === savedStudentId) || this.students[0];
-    this.currentGrade = this.currentStudent.grade || 6;
+    this.currentGrade = this.currentStudent ? (this.currentStudent.grade || 6) : 6;
   }
 
   saveStorage() {
@@ -2348,7 +2366,7 @@ class MathApp {
         </div>
         <div class="header-stats">
           <button class="role-pill" onclick="app.toggleRole('student')">
-            <span>🎓</span> Chuyển sang Học sinh
+            <span>🎓</span> Chế độ Học sinh
           </button>
         </div>
       `;
@@ -2358,22 +2376,28 @@ class MathApp {
           <div class="brand-logo">📐</div>
           <div class="brand-info">
             <h1>HÀNH TRÌNH TOÁN HỌC</h1>
-            <p>${this.currentStudent.nickname} • Lớp ${this.currentGrade}</p>
+            <p>${this.currentStudent ? this.currentStudent.nickname : 'Học sinh'} • Lớp ${this.currentGrade}</p>
           </div>
         </div>
         <div class="header-stats">
           <div class="stat-chip energy" title="Năng lượng">
-            <span>❤️</span> <span>${this.currentStudent.energy}/5</span>
+            <span>❤️</span> <span>${this.currentStudent ? this.currentStudent.energy : 5}/5</span>
           </div>
           <div class="stat-chip streak" title="Chuỗi ngày học">
-            <span>🔥</span> <span>${this.currentStudent.streak}</span>
+            <span>🔥</span> <span>${this.currentStudent ? this.currentStudent.streak : 1}</span>
           </div>
           <div class="stat-chip xp" title="Điểm kinh nghiệm XP">
-            <span>⚡</span> <span>${this.currentStudent.xp}</span>
+            <span>⚡</span> <span>${this.currentStudent ? this.currentStudent.xp : 0}</span>
           </div>
-          <button class="role-pill" onclick="app.toggleRole('admin')" title="Vào xem màn hình giáo viên/admin">
-            <span>⚙️</span> Admin
-          </button>
+          ${this.isAdminDevice ? `
+            <button class="role-pill" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;" onclick="app.toggleRole('admin')" title="Vào bảng Quản trị viên (Máy Admin)">
+              <span>🛡️</span> Admin
+            </button>
+          ` : `
+            <button class="role-pill" style="opacity: 0.75;" onclick="app.promptAdminDeviceVerification()" title="Chỉ dành cho máy của Giáo viên / Admin">
+              <span>🔒</span> Admin
+            </button>
+          `}
         </div>
       `;
     }
@@ -2408,7 +2432,15 @@ class MathApp {
 
   toggleRole(targetRole) {
     window.soundFX?.playClick();
-    this.currentRole = targetRole || (this.currentRole === 'admin' ? 'student' : 'admin');
+    if (targetRole === 'admin' || (this.currentRole !== 'admin' && !targetRole)) {
+      if (!this.isAdminDevice) {
+        this.promptAdminDeviceVerification();
+        return;
+      }
+      this.currentRole = 'admin';
+    } else {
+      this.currentRole = 'student';
+    }
     this.renderHeader();
     this.renderBottomNav();
     if (this.currentRole === 'admin') {
@@ -3337,20 +3369,36 @@ class MathApp {
   }
 
   // ========================================================================
-  // VIEW: HỒ SƠ CÁ NHÂN (PROFILE)
+  // VIEW: HỒ SƠ CÁ NHÂN (PROFILE & QUẢN LÝ TÀI KHOẢN HỌC SINH)
   // ========================================================================
   renderProfileView(container) {
-    const st = this.currentStudent;
+    const st = this.currentStudent || this.students[0];
     container.innerHTML = `
       <div class="view-container">
-        <div class="chapter-card" style="padding: 20px; display: flex; align-items: center; gap: 16px;">
-          <div style="font-size: 54px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border: 2px solid #6366f1;">
-            ${st.avatar}
-          </div>
-          <div>
-            <h2 style="font-size: 20px; font-weight: 800;">${st.nickname}</h2>
-            <div style="font-size: 13px; color: var(--text-muted);">${st.name} • ${st.school}</div>
-            <div style="font-size: 12px; color: #38bdf8; font-weight: 700; margin-top: 4px;">Khối Lớp ${st.grade} • Lớp ${st.classCode}</div>
+        <!-- Thẻ thông tin tài khoản học sinh -->
+        <div class="chapter-card" style="padding: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="font-size: 54px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border: 2px solid #6366f1;">
+                ${st.avatar}
+              </div>
+              <div>
+                <h2 style="font-size: 20px; font-weight: 800;">${st.nickname}</h2>
+                <div style="font-size: 13px; color: var(--text-muted);">${st.name} • ${st.school}</div>
+                <div style="font-size: 12px; color: #38bdf8; font-weight: 700; margin-top: 4px;">Khối Lớp ${st.grade} • Lớp ${st.classCode}</div>
+                <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px;">
+                  Tên đăng nhập: <strong>${st.username}</strong> • Mật khẩu: <strong>••••••</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Các nút thao tác tài khoản -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="app.openChangePasswordModal()">🔒 Đổi Mật Khẩu</button>
+              <button class="btn btn-primary btn-sm" onclick="app.openLoginModal('login')">👥 Đổi Tài Khoản</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.openLoginModal('register')">✨ Đăng Ký Mới</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.exportStudentProgressSync()">📤 Xuất Tiến Trình</button>
+            </div>
           </div>
         </div>
 
@@ -3375,6 +3423,33 @@ class MathApp {
             <span class="kpi-label">ĐỘ CHÍNH XÁC</span>
             <span class="kpi-value" style="color: #10b981;">${st.accuracy}%</span>
             <span class="kpi-sub">Trung bình các bài</span>
+          </div>
+        </div>
+
+        <!-- Trạng thái thiết bị & Phân quyền -->
+        <div class="chapter-card" style="padding: 16px; border-left: 4px solid ${this.isAdminDevice ? '#ef4444' : '#6366f1'};">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: ${this.isAdminDevice ? '#f87171' : '#38bdf8'};">
+                ${this.isAdminDevice ? '🛡️ THIẾT BỊ NÀY ĐANG LÀ MÁY QUẢN TRỊ VIÊN' : '🎓 THIẾT BỊ NÀY LÀ MÁY HỌC SINH'}
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                ${this.isAdminDevice ? 'Máy này có toàn quyền quản lý, giám sát học sinh và xuất file tổng hợp.' : 'Các máy của học sinh chỉ được tham gia học tập. Chỉ máy có mã bí mật của Admin mới mở được quyền Quản trị.'}
+              </div>
+            </div>
+            <div>
+              ${this.isAdminDevice ? `
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-primary btn-sm" onclick="app.toggleRole('admin')">🛡️ Vào Bảng Admin</button>
+                  <button class="btn btn-secondary btn-sm" onclick="app.changeAdminMasterKey()">⚙️ Đổi Mã Admin</button>
+                  <button class="btn btn-danger btn-sm" onclick="app.revokeAdminDevice()">🚪 Hủy Quyền Admin Trên Máy Này</button>
+                </div>
+              ` : `
+                <button class="btn btn-secondary btn-sm" onclick="app.promptAdminDeviceVerification()">
+                  🔒 Mở Quyền Quản Trị (Nhập Mã Admin)
+                </button>
+              `}
+            </div>
           </div>
         </div>
 
@@ -3418,9 +3493,10 @@ class MathApp {
             <p style="font-size: 13px; color: var(--text-muted);">Theo dõi hoạt động thời gian thực của học sinh và quản lý nội dung</p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn btn-success btn-sm" onclick="app.openImportModal()">📥 Nhập File Đề (CSV / JSON)</button>
-            <button class="btn btn-primary btn-sm" onclick="app.openAddQuestionModal()">+ Thêm Thủ Công</button>
-            <button class="btn btn-secondary btn-sm" onclick="app.exportDataJson()">💾 Xuất Dữ Liệu</button>
+            <button class="btn btn-success btn-sm" onclick="app.exportStudentSummaryReport()">📊 Xuất Báo Cáo Tổng Hợp (Excel/CSV)</button>
+            <button class="btn btn-primary btn-sm" onclick="app.openImportModal()">📥 Nhập File Đề (CSV / JSON)</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.openCloudSyncModal()">☁️ Đồng Bộ Thiết Bị</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.exportDataJson()">💾 Sao Lưu JSON</button>
           </div>
         </div>
 
@@ -3561,39 +3637,61 @@ class MathApp {
     `;
   }
 
-  // TAB 2: DANH SÁCH HỌC SINH & CHI TIẾT
+  // TAB 2: DANH SÁCH HỌC SINH & QUẢN LÝ MẬT KHẨU / XUẤT TỔNG HỢP
   renderAdminStudentsTab() {
     return `
       <div class="table-card">
-        <div style="padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <h3 style="font-size: 15px; font-weight: 700;">Hồ sơ học sinh tham gia học tập:</h3>
-          <input type="text" placeholder="Tìm tên, trường, lớp..." class="form-control" style="width: 240px; padding: 6px 12px; font-size: 13px;" oninput="app.filterStudentsList(this.value)" />
+        <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800;">👥 Hồ sơ & Mật khẩu học sinh (${this.students.length}):</h3>
+            <p style="font-size: 12px; color: var(--text-muted);">Theo dõi hoạt động, cấp lại mật khẩu và xuất bảng tổng hợp đánh giá</p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <button class="btn btn-success btn-sm" onclick="app.exportStudentSummaryReport()">📊 Xuất Báo Cáo Tổng Hợp (Excel/CSV)</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.openCloudSyncModal()">☁️ Đồng Bộ / Nạp Dữ Liệu</button>
+            <button class="btn btn-primary btn-sm" onclick="app.openLoginModal('register')">+ Thêm Học Sinh</button>
+            <input type="text" placeholder="Tìm tên, trường, lớp..." class="form-control" style="width: 180px; padding: 4px 10px; font-size: 13px;" oninput="app.filterStudentsList(this.value)" />
+          </div>
         </div>
         <div class="table-responsive">
           <table class="data-table" id="students-admin-table">
             <thead>
               <tr>
                 <th>Học Sinh</th>
+                <th>Tài Khoản & MK</th>
                 <th>Khối Lớp</th>
                 <th>Trường / Lớp</th>
                 <th>XP & Cấp</th>
                 <th>Tổng Sao</th>
                 <th>Độ Chính Xác</th>
+                <th>Xếp Loại</th>
                 <th>Hoạt Động Cuối</th>
                 <th>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
-              ${this.students.map(st => `
+              ${this.students.map(st => {
+                const acc = st.accuracy || 80;
+                let rankLabel = 'Khá';
+                let rankColor = '#38bdf8';
+                if (acc >= 90 && (st.xp || 0) >= 3000) { rankLabel = 'Xuất sắc'; rankColor = '#10b981'; }
+                else if (acc >= 80) { rankLabel = 'Giỏi'; rankColor = '#34d399'; }
+                else if (acc < 65) { rankLabel = 'Cần bồi dưỡng'; rankColor = '#f87171'; }
+
+                return `
                 <tr>
                   <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <span style="font-size: 20px;">${st.avatar}</span>
                       <div>
                         <strong>${st.name}</strong>
-                        <div style="font-size: 11px; color: var(--text-muted);">${st.nickname} (${st.username})</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">${st.nickname}</div>
                       </div>
                     </div>
+                  </td>
+                  <td>
+                    <strong style="color: #c7d2fe;">${st.username}</strong>
+                    <div style="font-size: 11px; color: #10b981; font-weight: 700;">MK: ${st.password || '123'}</div>
                   </td>
                   <td>Lớp ${st.grade}</td>
                   <td>${st.school} <br/><span style="color: var(--text-muted); font-size: 11px;">Mã lớp: ${st.classCode}</span></td>
@@ -3603,15 +3701,19 @@ class MathApp {
                   </td>
                   <td><span style="color: #fbbf24; font-weight: 700;">${st.stars} ⭐</span></td>
                   <td><span style="color: #10b981; font-weight: 700;">${st.accuracy}%</span></td>
-                  <td style="color: var(--text-muted);">${st.lastActive}</td>
+                  <td><span class="tag-badge" style="background: rgba(255,255,255,0.06); color: ${rankColor};">${rankLabel}</span></td>
+                  <td style="color: var(--text-muted);">${st.lastActive || 'Chưa học'}</td>
                   <td>
-                    <button class="btn btn-secondary btn-sm" onclick="app.inspectStudent('${st.id}')">Xem Chi Tiết</button>
-                    ${st.status === 'flagged' ? `
-                      <button class="btn btn-danger btn-sm" style="margin-left: 4px;" onclick="app.resetStudentScore('${st.id}')">Reset Điểm</button>
-                    ` : ''}
+                    <div style="display: flex; gap: 4px;">
+                      <button class="btn btn-secondary btn-sm" onclick="app.inspectStudent('${st.id}')">Chi Tiết</button>
+                      <button class="btn btn-secondary btn-sm" style="background: #312e81; color: #c7d2fe;" onclick="app.openAdminResetPasswordModal('${st.id}')" title="Cấp lại mật khẩu">🔑 Đổi MK</button>
+                      ${st.status === 'flagged' ? `
+                        <button class="btn btn-danger btn-sm" style="padding: 2px 6px;" onclick="app.resetStudentScore('${st.id}')">Reset</button>
+                      ` : ''}
+                    </div>
                   </td>
                 </tr>
-              `).join('')}
+              `;}).join('')}
             </tbody>
           </table>
         </div>
@@ -4369,6 +4471,673 @@ class MathApp {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  exportStudentSummaryReport() {
+    window.soundFX?.playClick();
+    if (!this.students || this.students.length === 0) {
+      alert("Chưa có dữ liệu học sinh để xuất báo cáo!");
+      return;
+    }
+
+    const headers = [
+      "STT",
+      "Ho_Va_Ten",
+      "Ten_Dang_Nhap",
+      "Mat_Khau",
+      "Biet_Danh",
+      "Khoi_Lop",
+      "Truong_Hoc",
+      "Lop_Hoc",
+      "Cap_Do_Level",
+      "Diem_XP",
+      "Tong_Sao",
+      "Do_Chinh_Xac_PT",
+      "So_Luot_Choi",
+      "Chuoi_Ngay_Streak",
+      "Xep_Loai_Hoc_Luc",
+      "Trang_Thai",
+      "Hoat_Dong_Cuoi",
+      "Danh_Gia_Tong_Quat"
+    ];
+
+    const rows = [headers.join(',')];
+
+    this.students.forEach((st, idx) => {
+      const acc = st.accuracy || 80;
+      const xp = st.xp || 0;
+      let rank = "Khá";
+      let review = "Cần tiếp tục duy trì luyện tập đều đặn";
+
+      if (acc >= 90 && xp >= 3000) {
+        rank = "Xuất sắc";
+        review = "Nắm rất vững kiến thức, tư duy nhanh và chính xác cao";
+      } else if (acc >= 80) {
+        rank = "Giỏi";
+        review = "Nắm tốt các dạng toán trọng tâm, làm bài tích cực";
+      } else if (acc < 65) {
+        rank = "Cần bồi dưỡng";
+        review = "Hay nhầm lẫn các khái niệm cơ bản, cần ôn tập thêm";
+      }
+
+      const row = [
+        idx + 1,
+        `"${(st.name || '').replace(/"/g, '""')}"`,
+        `"${(st.username || '').replace(/"/g, '""')}"`,
+        `"${(st.password || '123').replace(/"/g, '""')}"`,
+        `"${(st.nickname || '').replace(/"/g, '""')}"`,
+        st.grade || 6,
+        `"${(st.school || '').replace(/"/g, '""')}"`,
+        `"${(st.classCode || '').replace(/"/g, '""')}"`,
+        st.level || 1,
+        xp,
+        st.stars || 0,
+        `"${acc}%"`,
+        st.gamesPlayed || 0,
+        st.streak || 1,
+        `"${rank}"`,
+        `"${st.status === 'banned' ? 'Đã khóa' : (st.status === 'flagged' ? 'Cảnh báo' : 'Bình thường')}"`,
+        `"${(st.lastActive || 'Chưa học').replace(/"/g, '""')}"`,
+        `"${review.replace(/"/g, '""')}"`
+      ];
+
+      rows.push(row.join(','));
+    });
+
+    const csvContent = "\uFEFF" + rows.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    a.download = `Bao_Cao_Tong_Hop_Hoc_Sinh_${dateStr}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    window.soundFX?.playVictory();
+  }
+
+  promptAdminDeviceVerification() {
+    window.soundFX?.playClick();
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3 style="color: #f87171;">🔐 XÁC THỰC THIẾT BỊ QUẢN TRỊ VIÊN</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Bảo vệ quyền Admin: Học sinh không thể vào khu vực này</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 12px; font-size: 13px; color: #fca5a5; line-height: 1.4;">
+          ⚠️ <strong>Khu vực dành riêng cho Giáo viên / Quản trị viên:</strong><br/>
+          Các máy khác khi tải về chỉ có quyền đăng nhập làm bài với vai trò Học sinh. Để xác thực máy tính này là <strong>Thiết Bị Quản Trị Viên Duy Nhất</strong>, vui lòng nhập mã bảo mật của bạn.
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Mã bảo mật Quản trị viên (Master Key):</label>
+          <input type="password" id="admin-master-key-input" class="form-control" placeholder="Nhập mã bảo mật Admin..." style="font-size: 16px; letter-spacing: 2px;" />
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Mã mặc định hệ thống: <code>admin123456</code> (Có thể đổi sau khi vào Admin)</div>
+        </div>
+
+        <div style="margin: 8px 0;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #f8fafc;">
+            <input type="checkbox" id="remember-admin-device" checked />
+            <span>Ghi nhớ máy này là <strong>Thiết Bị Quản Trị Viên</strong> (Lần sau không cần nhập lại)</span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 8px; font-size: 15px; padding: 12px;" onclick="app.verifyAdminKey()">
+          🔓 Mở Khóa Quyền Quản Trị Viên
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  verifyAdminKey() {
+    const inputKey = document.getElementById('admin-master-key-input')?.value.trim();
+    const remember = document.getElementById('remember-admin-device')?.checked;
+
+    if (inputKey === this.adminKey) {
+      if (remember) {
+        localStorage.setItem('htth_is_admin_device', 'true');
+        this.isAdminDevice = true;
+      }
+      this.currentRole = 'admin';
+      this.closeModal();
+      this.renderHeader();
+      this.renderBottomNav();
+      this.switchView('admin');
+      window.soundFX?.playVictory();
+    } else {
+      window.soundFX?.playWrong();
+      alert("❌ Mã bảo mật không chính xác! Bạn không có quyền truy cập khu vực Quản trị.");
+    }
+  }
+
+  changeAdminMasterKey() {
+    window.soundFX?.playClick();
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>⚙️ THAY ĐỔI MÃ BẢO MẬT QUẢN TRỊ VIÊN</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Mã này dùng để mở quyền Admin trên máy tính của bạn</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Mã bảo mật hiện tại:</label>
+          <input type="password" id="cur-admin-key" class="form-control" placeholder="Nhập mã hiện tại..." />
+        </div>
+        <div class="form-group">
+          <label>Mã bảo mật mới (ít nhất 6 ký tự):</label>
+          <input type="password" id="new-admin-key" class="form-control" placeholder="Nhập mã mới..." />
+        </div>
+        <div class="form-group">
+          <label>Xác nhận mã bảo mật mới:</label>
+          <input type="password" id="confirm-admin-key" class="form-control" placeholder="Nhập lại mã mới..." />
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveNewAdminMasterKey()">
+          Cập Nhật Mã Quản Trị Mới
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  saveNewAdminMasterKey() {
+    const cur = document.getElementById('cur-admin-key')?.value.trim();
+    const newK = document.getElementById('new-admin-key')?.value.trim();
+    const conf = document.getElementById('confirm-admin-key')?.value.trim();
+
+    if (cur !== this.adminKey) {
+      alert("Mã bảo mật hiện tại không đúng!");
+      return;
+    }
+    if (!newK || newK.length < 6) {
+      alert("Mã bảo mật mới phải có tối thiểu 6 ký tự!");
+      return;
+    }
+    if (newK !== conf) {
+      alert("Xác nhận mã mới không khớp!");
+      return;
+    }
+
+    this.adminKey = newK;
+    localStorage.setItem('htth_admin_key', newK);
+    window.soundFX?.playCorrect();
+    alert("✅ Đã cập nhật mã bảo mật Quản trị viên mới thành công!");
+    this.closeModal();
+  }
+
+  revokeAdminDevice() {
+    if (confirm("Bạn có chắc chắn muốn hủy quyền Admin trên máy này? Thiết bị này sẽ trở thành máy học sinh thông thường.")) {
+      localStorage.removeItem('htth_is_admin_device');
+      this.isAdminDevice = false;
+      this.currentRole = 'student';
+      this.renderHeader();
+      this.renderBottomNav();
+      this.switchView('learn');
+      alert("Đã hủy quyền Admin trên máy này!");
+    }
+  }
+
+  openLoginModal(defaultTab = 'login') {
+    window.soundFX?.playClick();
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>🎓 TÀI KHOẢN HỌC SINH</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Đăng nhập hoặc đăng ký tài khoản có mật khẩu riêng</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px;">
+          <button type="button" class="admin-tab-btn ${defaultTab === 'login' ? 'active' : ''}" id="auth-tab-login" onclick="app.switchAuthTab('login')">
+            🔑 Đăng Nhập
+          </button>
+          <button type="button" class="admin-tab-btn ${defaultTab === 'register' ? 'active' : ''}" id="auth-tab-register" onclick="app.switchAuthTab('register')">
+            ✨ Tạo Tài Khoản Mới
+          </button>
+        </div>
+
+        <div id="auth-pane-login" style="display: ${defaultTab === 'login' ? 'block' : 'none'};">
+          <div class="form-group">
+            <label>Tên đăng nhập:</label>
+            <input type="text" id="login-username" class="form-control" placeholder="Ví dụ: minhanh_k6" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Mật khẩu:</label>
+            <input type="password" id="login-password" class="form-control" placeholder="Nhập mật khẩu..." />
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; margin-top: 16px; font-size: 15px; padding: 12px;" onclick="app.submitStudentLogin()">
+            🚀 Đăng Nhập & Học Tiếp
+          </button>
+
+          <div style="margin-top: 12px; text-align: center; font-size: 12px; color: var(--text-muted);">
+            Chưa có tài khoản? <a href="javascript:void(0)" onclick="app.switchAuthTab('register')" style="color: #38bdf8; font-weight: 700;">Tạo tài khoản mới tại đây</a>
+          </div>
+        </div>
+
+        <div id="auth-pane-register" style="display: ${defaultTab === 'register' ? 'block' : 'none'};">
+          <div class="form-group">
+            <label>Họ và tên học sinh:</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+            <div class="form-group">
+              <label>Biệt danh hiển thị:</label>
+              <input type="text" id="reg-nickname" class="form-control" placeholder="Ví dụ: AnSieuToan" />
+            </div>
+            <div class="form-group">
+              <label>Khối lớp:</label>
+              <select id="reg-grade" class="form-control">
+                <option value="6">Lớp 6 (Rừng Xanh)</option>
+                <option value="7">Lớp 7 (Đại Dương)</option>
+                <option value="8">Lớp 8 (Công Nghệ)</option>
+                <option value="9">Lớp 9 (Vũ Trụ)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+            <div class="form-group">
+              <label>Tên trường học:</label>
+              <input type="text" id="reg-school" class="form-control" placeholder="Ví dụ: THCS Chu Văn An" />
+            </div>
+            <div class="form-group">
+              <label>Lớp học / Mã lớp:</label>
+              <input type="text" id="reg-class" class="form-control" placeholder="Ví dụ: 6A1" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 8px;">
+            <label>Chọn biểu tượng đại diện (Avatar):</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 24px; padding: 6px; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm);" id="reg-avatar-picker">
+              ${['🦊', '🐬', '🤖', '🚀', '🦁', '🐼', '🐯', '⚡', '🦉', '🦄'].map((av, i) => `
+                <span class="avatar-option" style="cursor: pointer; padding: 4px; border-radius: 50%; ${i === 0 ? 'background: rgba(99, 102, 241, 0.4);' : ''}" onclick="app.selectRegAvatar('${av}', this)">${av}</span>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 8px;">
+            <label>Tên đăng nhập (viết liền không dấu):</label>
+            <input type="text" id="reg-username" class="form-control" placeholder="Ví dụ: vanan_6a1" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+            <div class="form-group">
+              <label>Mật khẩu riêng:</label>
+              <input type="password" id="reg-password" class="form-control" placeholder="Nhập mật khẩu..." />
+            </div>
+            <div class="form-group">
+              <label>Nhập lại mật khẩu:</label>
+              <input type="password" id="reg-confirm-password" class="form-control" placeholder="Xác nhận mật khẩu..." />
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; margin-top: 16px; font-size: 15px; padding: 12px;" onclick="app.submitStudentRegister()">
+            🎉 Hoàn Tất Đăng Ký & Bắt Đầu Học
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  selectRegAvatar(avatar, el) {
+    document.querySelectorAll('#reg-avatar-picker .avatar-option').forEach(a => a.style.background = 'transparent');
+    el.style.background = 'rgba(99, 102, 241, 0.4)';
+    this.selectedRegAvatar = avatar;
+  }
+
+  switchAuthTab(tab) {
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`auth-tab-${tab}`)?.classList.add('active');
+    document.getElementById('auth-pane-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('auth-pane-register').style.display = tab === 'register' ? 'block' : 'none';
+  }
+
+  submitStudentLogin() {
+    const username = document.getElementById('login-username')?.value.trim().toLowerCase();
+    const password = document.getElementById('login-password')?.value.trim();
+
+    if (!username || !password) {
+      alert("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
+      return;
+    }
+
+    const st = this.students.find(s => s.username.toLowerCase() === username);
+    if (!st) {
+      alert("❌ Không tìm thấy tài khoản học sinh này!");
+      return;
+    }
+
+    if (st.password && st.password !== password) {
+      alert("❌ Mật khẩu không chính xác! Vui lòng thử lại hoặc liên hệ Quản trị viên để cấp lại.");
+      return;
+    }
+
+    this.currentStudent = st;
+    this.currentGrade = st.grade || 6;
+    localStorage.setItem('htth_current_student_id', st.id);
+    this.closeModal();
+    this.renderHeader();
+    this.renderBottomNav();
+    this.switchView('learn');
+    window.soundFX?.playCorrect();
+    alert(`🎉 Chào mừng ${st.nickname} đã đăng nhập thành công!`);
+  }
+
+  submitStudentRegister() {
+    const name = document.getElementById('reg-name')?.value.trim();
+    const nickname = document.getElementById('reg-nickname')?.value.trim() || name;
+    const grade = parseInt(document.getElementById('reg-grade')?.value) || 6;
+    const school = document.getElementById('reg-school')?.value.trim() || 'THCS';
+    const classCode = document.getElementById('reg-class')?.value.trim() || `${grade}A`;
+    const username = document.getElementById('reg-username')?.value.trim().toLowerCase();
+    const password = document.getElementById('reg-password')?.value.trim();
+    const confirm = document.getElementById('reg-confirm-password')?.value.trim();
+    const avatar = this.selectedRegAvatar || '🦊';
+
+    if (!name || !username || !password) {
+      alert("Vui lòng điền Họ tên, Tên đăng nhập và Mật khẩu!");
+      return;
+    }
+
+    if (password.length < 3) {
+      alert("Mật khẩu phải có ít nhất 3 ký tự!");
+      return;
+    }
+
+    if (password !== confirm) {
+      alert("Xác nhận mật khẩu không khớp!");
+      return;
+    }
+
+    if (this.students.some(s => s.username.toLowerCase() === username)) {
+      alert("Tên đăng nhập này đã được sử dụng! Vui lòng chọn tên đăng nhập khác.");
+      return;
+    }
+
+    const newStudent = {
+      id: 'hs_' + Date.now(),
+      username: username,
+      password: password,
+      name: name,
+      nickname: nickname,
+      grade: grade,
+      avatar: avatar,
+      school: school,
+      classCode: classCode,
+      xp: 0,
+      level: 1,
+      stars: 0,
+      streak: 1,
+      energy: 5,
+      status: 'active',
+      lastActive: 'Vừa đăng ký',
+      accuracy: 100,
+      gamesPlayed: 0,
+      completedLessons: [],
+      lessonStars: {}
+    };
+
+    this.students.push(newStudent);
+    this.currentStudent = newStudent;
+    this.currentGrade = grade;
+    this.saveStorage();
+
+    this.closeModal();
+    this.renderHeader();
+    this.renderBottomNav();
+    this.switchView('learn');
+    window.soundFX?.playVictory();
+    alert(`🎉 Chúc mừng ${nickname}! Tài khoản của bạn đã được tạo thành công.`);
+  }
+
+  openChangePasswordModal() {
+    window.soundFX?.playClick();
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>🔒 ĐỔI MẬT KHẨU HỌC SINH</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">${this.currentStudent.nickname} (${this.currentStudent.username})</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Mật khẩu hiện tại:</label>
+          <input type="password" id="cur-pass-input" class="form-control" placeholder="Nhập mật khẩu hiện tại..." />
+        </div>
+        <div class="form-group" style="margin-top: 8px;">
+          <label>Mật khẩu mới (tối thiểu 3 ký tự):</label>
+          <input type="password" id="new-pass-input" class="form-control" placeholder="Nhập mật khẩu mới..." />
+        </div>
+        <div class="form-group" style="margin-top: 8px;">
+          <label>Nhập lại mật khẩu mới:</label>
+          <input type="password" id="confirm-new-pass-input" class="form-control" placeholder="Xác nhận mật khẩu mới..." />
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 12px;" onclick="app.submitChangePassword()">
+          ✓ Cập Nhật Mật Khẩu
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  submitChangePassword() {
+    const cur = document.getElementById('cur-pass-input')?.value.trim();
+    const newP = document.getElementById('new-pass-input')?.value.trim();
+    const conf = document.getElementById('confirm-new-pass-input')?.value.trim();
+
+    if (this.currentStudent.password && cur !== this.currentStudent.password) {
+      alert("❌ Mật khẩu hiện tại không chính xác!");
+      return;
+    }
+
+    if (!newP || newP.length < 3) {
+      alert("Mật khẩu mới phải có tối thiểu 3 ký tự!");
+      return;
+    }
+
+    if (newP !== conf) {
+      alert("Xác nhận mật khẩu mới không khớp!");
+      return;
+    }
+
+    this.currentStudent.password = newP;
+    this.saveStorage();
+    window.soundFX?.playCorrect();
+    alert("✅ Đã đổi mật khẩu thành công! Mật khẩu mới đã được lưu.");
+    this.closeModal();
+    this.switchView('profile');
+  }
+
+  openAdminResetPasswordModal(studentId) {
+    window.soundFX?.playClick();
+    const st = this.students.find(s => s.id === studentId);
+    if (!st) return;
+
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>🔑 CẤP LẠI MẬT KHẨU HỌC SINH</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">${st.name} • Tên đăng nhập: ${st.username}</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: var(--radius-sm); font-size: 13px; color: #c7d2fe;">
+          Mật khẩu hiện tại: <strong>${st.password || '123'}</strong>
+        </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Nhập mật khẩu mới cho học sinh này:</label>
+          <input type="text" id="admin-new-pass-input" class="form-control" value="123456" />
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick="app.submitAdminResetPassword('${st.id}')">
+          ✓ Lưu Mật Khẩu Mới Cho Học Sinh
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  submitAdminResetPassword(studentId) {
+    const st = this.students.find(s => s.id === studentId);
+    if (!st) return;
+    const newPass = document.getElementById('admin-new-pass-input')?.value.trim();
+    if (!newPass) {
+      alert("Vui lòng nhập mật khẩu mới!");
+      return;
+    }
+    st.password = newPass;
+    this.saveStorage();
+    window.soundFX?.playCorrect();
+    alert(`✅ Đã cấp lại mật khẩu cho học sinh ${st.name}: ${newPass}`);
+    this.closeModal();
+    this.switchAdminTab('students');
+  }
+
+  exportStudentProgressSync() {
+    window.soundFX?.playClick();
+    const st = this.currentStudent;
+    const payload = {
+      type: "student_sync_package",
+      exportedAt: new Date().toISOString(),
+      student: st,
+      recentActivities: this.activities.filter(a => a.studentId === st.id)
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Tien_Trinh_${st.username}_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert("📤 Đã xuất file tiến trình học tập của bạn! Bạn có thể gửi file này cho Thầy/Cô để cập nhật vào bảng tổng hợp.");
+  }
+
+  openCloudSyncModal() {
+    window.soundFX?.playClick();
+    const modal = document.getElementById('app-modal');
+    const modalBody = document.getElementById('modal-content-area');
+
+    modalBody.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <h3>☁️ ĐỒNG BỘ DỮ LIỆU NHIỀU THIẾT BỊ</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Kết nối tiến trình học sinh từ các điện thoại khác về máy Admin</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-md); padding: 12px; font-size: 13px; color: #c7d2fe;">
+          💡 <strong>Nạp file tiến trình do học sinh gửi:</strong><br/>
+          Học sinh trên điện thoại bấm nút <em>"Xuất Tiến Trình"</em> trong tab <em>Tôi</em> rồi gửi file JSON cho bạn. Bạn chỉ cần chọn file đó ở dưới để nạp điểm vào hệ thống.
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>Chọn file tiến trình học sinh (.json):</strong></label>
+          <input type="file" id="sync-file-input" accept=".json,.txt" class="form-control" onchange="app.handleStudentSyncFile(event)" />
+        </div>
+
+        <div class="form-group" style="margin-top: 8px;">
+          <label>Hoặc dán nội dung tiến trình học sinh vào đây:</label>
+          <textarea id="sync-text-paste" class="form-control" rows="4" placeholder="Dán nội dung JSON tiến trình vào đây..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="app.importStudentSyncData()">
+          📥 Nạp Tiến Trình Vào Bảng Theo Dõi
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+  }
+
+  handleStudentSyncFile(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const area = document.getElementById('sync-text-paste');
+      if (area) area.value = text;
+      this.importStudentSyncData();
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  importStudentSyncData() {
+    const text = document.getElementById('sync-text-paste')?.value.trim();
+    if (!text) {
+      alert("Vui lòng chọn file hoặc dán nội dung tiến trình học sinh!");
+      return;
+    }
+
+    try {
+      const data = JSON.parse(text);
+      const incomingStudent = data.student || (data.id ? data : null);
+      if (!incomingStudent || !incomingStudent.name) {
+        alert("Định dạng file không hợp lệ!");
+        return;
+      }
+
+      const existingIndex = this.students.findIndex(s => s.id === incomingStudent.id || (incomingStudent.username && s.username.toLowerCase() === incomingStudent.username.toLowerCase()));
+      if (existingIndex >= 0) {
+        this.students[existingIndex] = {
+          ...this.students[existingIndex],
+          ...incomingStudent,
+          xp: Math.max(this.students[existingIndex].xp || 0, incomingStudent.xp || 0),
+          stars: Math.max(this.students[existingIndex].stars || 0, incomingStudent.stars || 0),
+          lastActive: "Vừa cập nhật từ file"
+        };
+      } else {
+        this.students.push(incomingStudent);
+      }
+
+      if (data.recentActivities && Array.isArray(data.recentActivities)) {
+        this.activities.unshift(...data.recentActivities);
+      }
+
+      this.saveStorage();
+      window.soundFX?.playVictory();
+      alert(`🎉 Đã nạp thành công tiến trình của học sinh ${incomingStudent.name}!`);
+      this.closeModal();
+      this.switchAdminTab('students');
+    } catch (e) {
+      alert("Lỗi khi đọc file: " + e.message);
+    }
+  }
+
 
   bindGlobalEvents() {
     // Đóng modal khi bấm ra ngoài nền
